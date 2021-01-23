@@ -12,5 +12,3 @@ This is my blog. And it's testing.
 [This blog](https://steambird1.github.io/)
 
 [cmdtools](cmdtools.md)
-
-<font color="red">Note: this blog is incomplete.</font>
