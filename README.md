@@ -1,2 +1,3 @@
-# steambird1.github.io
-my blog
+# Welcome to steambird1.github.io
+
+This is my blog.
