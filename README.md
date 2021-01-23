@@ -12,3 +12,7 @@ This is my blog. And it's testing.
 [This blog](https://steambird1.github.io/)
 
 [cmdtools](cmdtools.md)
+
+### Anonther apps
+
+[Teaching programming](ap-tp.md)
