@@ -6,11 +6,15 @@ This is steambird's blog.
 ---
 
 ### My github repos
-[This blog](https://github.com/steambird1/steambird1.github.io)
+
+
 [seabird shell](https://github.com/steambird1/seabird_shell)
+
 [bluebetter](https://github.com/steambird1/bluebetter_language)
 
 [View all](allrepos.md)
+
+[Plan](plan.md)
 
 ### Anonther apps
 
@@ -23,6 +27,7 @@ This is steambird's blog.
 
 ### Deleted things
 ~~Test page~~
+~~Application page~~
 
 ### Contact me
-Mailbox: steambird@163.com
+Mail: steambird@163.com

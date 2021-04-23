@@ -178,14 +178,16 @@ int random(int min,int max) {
 	return scrh.getRandom()%(max-min)+min;
 }
 
-void counting(int sec) {
+void counting(int sec,bool block) {
   cout<<sec;
   Sleep(1000);
   for (int z = sec-1; z > 0; z--) {
-  	if (z>8) cout<<"\b\b";
-  	if (kbhit()) return; 
+  	if (z>=9) cout<<"\b";
+  	if (z==9||z==8) cout<<"\b";
+  	if (kbhit() && (!block)) return; 
   	else cout<<"\b";
   	cout<<z;
+  	if (z==9) cout<<" "; 
   	Sleep(1000);
   } 
 }
@@ -202,7 +204,8 @@ int main() {
  while (m>0&&stud) {
   system("cls");
   q+=2;
-  tonoip[8]=((stud*(tm+1))-printed);
+  int tnp=((stud*(tm+1))-printed);
+  tonoip[8]=tnp<0?0:tnp;
   cout << "老师教编程" << endl;
   cout << "老师还有 $ " << m << " 和 " << stud << " 个学生，";
   setColor("0B");
@@ -285,7 +288,7 @@ int main() {
     	int hospital = random(3000,4500);
     	setColor("0F");
     	cout << "老师过度劳累，住进了医院。" << endl << "医院需要支付医药费 $ " << hospital << endl << endl << "老师正在医院里治疗 ..." << endl;
-    	counting(15);
+    	counting(15,true);
     	m -= hospital;
 	}
    }
@@ -330,18 +333,6 @@ int main() {
    tonoip[8]-=count;
    printed+=count;
    cout << "打印成功，花费$" << count * 100 << "。" << endl;
-   bool noipflag = true;
-   for (int i = 0; i < 9; i++) {
-    if (tonoip[i]) {
-     noipflag = false;
-    }
-   }
-   if (noipflag) {
-   	setColor("0A");
-    cout << "现在又有" << tm * 5 << "个学生完成了CSP训练，总计有" << (tm*5)+nm << endl;
-    nm += tm * 5;
-    for (int i = 0; i < 9; i++) tonoip[i]=tm*tonoipstandard[i];
-   }
   } else if (c == '-') {
   	setColor("0A");
    if (nm<1) cout << "没有人可以参加CSP！" << endl;
@@ -368,7 +359,20 @@ int main() {
     mmm=0;
    }
   }
-  if (!hosi) counting(5);
+  bool noipflag = true;
+   for (int i = 0; i < 9; i++) {
+    if (tonoip[i]) {
+     noipflag = false;
+    }
+   }
+   if (noipflag) {
+   	setColor("0A");
+    cout << "现在又有" << tm * 5 << "个学生完成了CSP训练，总计有" << (tm*5)+nm << endl;
+    nm += tm * 5;
+    for (int i = 0; i < 9; i++) tonoip[i]=tm*tonoipstandard[i];
+   }
+  if (!hosi) counting(5,false);
+  setColor("07");
  }
  setColor("0C");
  cout << "老师最终被迫退出。原因是：" << endl;
