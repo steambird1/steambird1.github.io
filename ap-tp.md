@@ -10,7 +10,7 @@ This is a game. You should try to teach the algorithm and get more money. Good l
 
 [Download windows source code](library/teach-programming.cpp)
 
-<font color="red">If you can't download, contact me at [issues](https://github.com/steambird1/steambird1.github.io/issues).</font>
+<font color="red">If you can't download, contact me at <a href="https://github.com/steambird1/steambird1.github.io/issues">issues page</a>.</font>
 
 ### Update
 Some bug fixed
