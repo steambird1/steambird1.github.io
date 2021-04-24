@@ -7,10 +7,11 @@ This is steambird's blog.
 
 ### My github repos
 
-
 [seabird shell](https://github.com/steambird1/seabird_shell)
 
 [bluebetter](https://github.com/steambird1/bluebetter_language)
+
+[micro encryptor](https://github.com/steambird1/micro_encrypt)
 
 [View all](allrepos.md)
 
@@ -20,14 +21,14 @@ This is steambird's blog.
 
 [Teaching programming](ap-tp.md)
 
+### Changes
+The download of *Teaching programming* was moved to Github Releases.
+~~Local releases~~
+
 ### Future update
 
-1. Add manual of BlueBetter and Seabird Shell.
+1. Do something for Seabird Shell. See [here](plan.md).
 2. Translate the *Teaching Programming* and put it to a github repo.
-
-### Deleted things
-~~Test page~~
-~~Application page~~
 
 ### Contact me
 Mail: steambird@163.com

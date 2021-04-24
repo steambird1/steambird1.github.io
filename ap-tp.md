@@ -6,9 +6,11 @@
 
 This is a game. You should try to teach the algorithm and get more money. Good luck!
 
-[Download windows executable file](library/teach-programming.exe)
+[Download windows executable file](https://github.com/steambird1/steambird1.github.io/releases/download/v1.0/teach-programming.exe)
 
 [Download windows source code](library/teach-programming.cpp)
+
+<font color="red">If you can't download, contact me at [issues](https://github.com/steambird1/steambird1.github.io/issues).</font>
 
 ### Update
 Some bug fixed
