@@ -22,8 +22,7 @@ This is steambird's blog.
 [Teaching programming](ap-tp.md)
 
 ### Changes
-The download of *Teaching programming* was moved to Github Releases.
-~~Local releases~~
+Applications
 
 ### Future update
 
