@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<!-- 水浒传情节查询; 由蒋米尔制作! -->
+<html>
+<head>
+	<title>水浒人物查询</title>
+	<meta charset="utf-8" />
+	<script>
+		var data = "1,A;B;C,ABC\n1,A;B,ab\n2,B;C,X";	// csv：回数(数字!!),人物(;分割),内容，请按章回顺序！！！
+		
+		var last_pos = 0;
+		
+		// perlist 从 1 开始！
+		function event(pos, pers, content) {
+			this.pos = pos;
+			this.perlist = pers.split(";");
+			this.content = content;
+			
+			this.perlist.unshift("");
+			
+			this.getper = function() {
+				var tmp = "";
+				for (let i = 1; i < this.perlist.length; i++) tmp += (this.perlist[i] + ",");
+				return tmp.substr(0, tmp.length - 1);
+			}
+			
+			this.addit = function() {
+				var father = document.getElementById("content");
+				var me = document.createElement("li");
+				me.innerHTML = "第 " + this.pos + " 回,包含 " + this.getper() + " :<br />" + this.content;
+				var posint = parseInt(this.pos);
+				if (last_pos != posint) {
+					me.id = "pos_" + this.pos;
+					var linker = document.createElement("a");
+					var sp = document.createElement("br");
+					var abs = document.getElementById("abstract");
+					linker.href = "#" + me.id;
+					linker.innerHTML = "第 " + this.pos + " 回";
+					abs.appendChild(linker);
+					abs.appendChild(sp);
+					last_pos = posint;
+				}
+				father.appendChild(me);
+			}
+			
+			
+		}
+		
+		var events = [];
+		
+		function search(pinc) {
+			document.getElementById("abstract").innerHTML = "";
+			document.getElementById("content").innerHTML = "";
+			last_pos = 0;	// 更新目录需要
+			for (let i = 0; i < events.length; i++) {
+				if (events[i].perlist.indexOf(pinc) >= 0) {
+					events[i].addit();
+				}
+			}
+		}
+		
+		window.onload = function() {
+			var dl = data.split("\n");
+			for (let i = 0; i < dl.length; i++) {
+				var dat = dl[i].split(",");
+				events.push(new event(dat[0],dat[1],dat[2]));
+			}
+			search("");
+			document.getElementById("query").style = "display: block;"
+			document.getElementById("loader").style = "display: none;"
+		}
+		
+	</script>
+	<style>
+		p.guide {
+			font-weight: 700;
+		}
+	</style>
+</head>
+<body>
+	<noscript>
+		<h1>此页面需要 JavaScript。</h1>
+		<hr />
+		<p>请启用 JavaScript并<a href="#">刷新</a>页面，或更换浏览器再试。</p>
+	</noscript>
+	<h1>水浒情节查询</h1>
+	<div id="loader">
+		<p>加载中，请稍后...</p>
+		<p>若长时间没有加载完毕，请<a href="#">刷新</a>页面，或更换浏览器再试。</p>
+	</div>
+	<div id="query" style="display: none;">
+		<p class="guide">查询</p>
+		<span>输入要查找的人物:</span>
+		<input type="text" id="searchor" />
+		<button onclick="search(document.getElementById('searchor').value)">查找</button>
+		<br />
+		<p class="guide">目录</p>
+		<div id="abstract">
+		
+		</div>
+		<br />
+		<p class="guide">内容</p>
+		<ul id="content">
+		
+		</ul>
+	</div>
+</body>
+</html>
