@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<!-- 水浒传人物查询; 由蒋米尔制作! -->
+<html>
+<head>
+	<title>水浒人物查询</title>
+	<meta charset="utf-8" />
+	<script>
+	
+		var header = "a,b,c"; // 放置 csv 头列，格式：各关联信息
+		var csv = "p01,R,P01,1,0,0\np02,RR,PP02,0,1,1";	// 放置 csv 内容，格式：姓名,人物特征+评价,绰号,关联信息(1表示关联，0表示没有)
+		
+		var hlist, sels, clist;
+		var selectors = [];
+		
+		// 创建人物类
+		function person(flags, rela, nick) {
+			this.flags = flags;
+			this.rela = rela;
+			this.nick = nick;
+			
+			this.flag_export = function() {
+				var tmp = "";
+				for (let i = 0; i < this.flags.length; i++) {
+					if (this.flags[i] == "1") tmp += (hlist[i] + ",");
+				}
+				if (tmp != "") tmp = tmp.substr(0, tmp.length-1);
+				return tmp;
+			}
+		}
+		
+		var persons = {};
+		
+		window.onload = function() {
+			// 载入
+			hlist = header.split(",");
+			sels = document.getElementById("selector");
+			for (let i = 0; i < hlist.length; i++) {
+				var selector = document.createElement("input");
+				selector.type = "checkbox";
+				//selector.checked = true;
+				//selector.class = "selector";
+				selectors.push(selector);
+				selector.value = i;	// 表示 hlist 位置!
+				//selector.innerHTML = hlist[i];
+				var texter = document.createElement("span");
+				texter.innerHTML = hlist[i];
+				sels.appendChild(selector);
+				sels.appendChild(texter);
+				sels.appendChild(document.createElement("br"));
+			}
+			
+			clist = csv.split("\n");
+			for (let i = 0; i < clist.length; i++) {
+				var single = clist[i].split(",");
+				var name = single[0];
+				var rel = single[1];
+				var nick = single[2];
+				single.shift();
+				single.shift();
+				single.shift();	// delete name
+				persons[name] = new person(single, rel, nick);
+			}
+			
+			// 加载完成
+			document.getElementById("query").style = "display: block;"
+			document.getElementById("loader").style = "display: none;"
+		}
+		
+		function clr() {
+			document.getElementById("resultx").innerHTML = "";
+			document.getElementById("result").style = "display: none;"
+			document.getElementById("flagresult").style = "display: none;"
+		}
+		
+		// 搜索人物 0-名称 1-绰号
+		function search(mode) {
+			clr();
+			var p, name;
+			if (mode == 0) {
+				document.getElementById("nickswtc").innerHTML = "人物绰号";
+				p = persons[document.getElementById("searchor").value];
+				name = document.getElementById("searchor").value;
+				if (p == undefined) {
+					alert("未找到符合条件人物!");
+					return;
+				}
+				document.getElementById("nickz").innerHTML = p.nick;
+			} else {
+				document.getElementById("nickswtc").innerHTML = "人物名称";
+				p = null;
+				for (var i in persons) {
+					p = persons[i];
+					//console.log(p);//test
+					if (p.nick == document.getElementById("searchor").value) {
+						document.getElementById("nickz").innerHTML = i;
+						name = i;
+						break;
+					} else {
+						p = null;
+					}
+				}
+				if (p == null) {
+					alert("未找到符合条件人物!");
+					return;
+				}
+			}
+			document.getElementById("relz").innerHTML = p.rela;
+			document.getElementById("flags").innerHTML = p.flag_export();
+			document.getElementById("perimg").src = "https://steambird1.github.io/app/sh/img/" + name + ".jpg";
+			document.getElementById("result").style = "display: block;"
+		}
+		
+		function searchflag() {
+			clr();
+			var require = [];
+			for (let i = 0; i < selectors.length; i++) {
+				var cur = selectors[i];
+				if (cur.checked) {
+					require.push(cur.value);
+				}
+			}
+			var rx = document.getElementById("resultx");
+			for (var i in persons) {
+				var p = persons[i];	// i 是人名
+				let ok = true;
+				for (let i = 0; i < require.length; i++) {
+					if (p.flags[require[i]] == "0") ok = false;
+				}
+				if (ok) {
+					rx.innerHTML += (i + "(" + p.nick + "),");
+				}
+			}
+			if (rx.innerHTML != "")
+				rx.innerHTML = rx.innerHTML.substr(0, rx.innerHTML.length - 1);
+			else
+				rx.innerHTML = "无";
+			document.getElementById("flagresult").style = "display: block;"
+		}
+	</script>
+</head>
+<body>
+	<noscript>
+		<h1>此页面需要 JavaScript。</h1>
+		<hr />
+		<p>请启用 JavaScript并<a href="#">刷新</a>页面，或更换浏览器再试。</p>
+	</noscript>
+	<h1>水浒人物查询</h1>
+	<div id="loader">
+		<p>加载中，请稍后...</p>
+		<p>若长时间没有加载完毕，请<a href="#">刷新</a>页面，或更换浏览器再试。</p>
+	</div>
+	<div id="query" style="display: none;">
+		<p style="font-weight: 700;">选择搜索标签或搜索人物:</p>
+		<p>搜索标签:</p>
+		<div id="selector">
+		
+		</div>
+		<button onclick="searchflag();">搜索</button>
+		<hr />
+		<span>搜索人物: </span>
+		<input type="text" id="searchor" />
+		<button onclick="search(0);">按名称搜索</button>
+		<button onclick="search(1);">按绰号搜索</button>
+		<br />
+		<div id="flagresult" style="display: none;">
+			<p>符合条件的人物:</p>
+			<p id="resultx"></p>
+		</div>
+		<div id="result" style="display: none;">
+			<p id="nickswtc"></p>
+			<p id="nickz"></p>
+			<br />
+			<p>人物特征与评价:</p>
+			<p id="relz"></p>
+			<br />
+			<p>人物标签:</p>
+			<p id="flags"></p>
+			<p>人物简笔画:</p>
+			<img id="perimg"></p>
+		</div>
+	</div>
+</body>
+</html>
