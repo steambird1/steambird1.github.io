@@ -7,9 +7,9 @@ This is steambird's blog.
 
 ### My github repos
 
-[seabird shell](https://github.com/steambird1/seabird_shell)
+[MinServer](https://github.com/steambird1/MinServer)
 
-[bluebetter](https://github.com/steambird1/bluebetter_language)
+[bluebetter 4](https://github.com/steambird1/BlueBetter4)
 
 [micro encryptor](https://github.com/steambird1/micro_encrypt)
 
@@ -23,11 +23,6 @@ This is steambird's blog.
 
 ### Changes
 Applications
-
-### Future update
-
-1. Do something for Seabird Shell. See [here](plan.md).
-2. Translate the *Teaching Programming* and put it to a github repo.
 
 ### Contact me
 Mail: steambird@163.com
