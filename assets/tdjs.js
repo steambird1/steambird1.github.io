@@ -67,16 +67,17 @@ function Database(username, passwd) {
 		this.getResponseTextSync("action=update&tag=" + key + "&value=" + value);
 	};
 	
-	this.updateAsync = function(key, value) {
-		this.getResponseTextAsync("action=update&tag=" + key + "&value=" + value, function(hq) {});
+	// receiver() have no argument.
+	this.updateAsync = function(key, value, receiver) {
+		this.getResponseTextAsync("action=update&tag=" + key + "&value=" + value, function(hq) { if (receiver != undefined) receiver(); });
 	};
 	
 	this.remove = function(key) {
 		this.getResponseTextSync("action=delete&tag=" + key);
 	}
 	
-	this.removeAsync = function(key) {
-		this.getResponseTextAsync("action=delete&tag=" + key, function(hq) {});
+	this.removeAsync = function(key, receiver) {
+		this.getResponseTextAsync("action=delete&tag=" + key, function(hq) { if (receiver != undefined) receiver(); });
 	}
 	
 	this.get = function(key) {
