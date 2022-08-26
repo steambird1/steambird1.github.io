@@ -1,0 +1,216 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>开学倒计时</title>
+	<script>
+	// tdjs.js
+// Tiny Database JavaScript Support
+// (c) 2022 seabird (3587320341@qq.com)
+
+// JavaScript support for
+const prefix_api = "http://tinywebdb.appinventor.space/api";
+const db_limit = 100;
+
+function DatabaseException(msg) {
+	
+}
+
+function internalParse(hq) {
+		var res = hq.responseText;
+		if ((res.length <= 0) || (res[0] != "{")) {
+			throw new DatabaseException(res);
+		} else {
+			return res;
+		}
+	};
+
+function ifdef(judge, if_def, if_ndef) {
+	if (judge == undefined) {
+		return if_ndef;
+	} else {
+		return if_def;
+	}
+}
+
+function Database(username, passwd) {
+	
+	this.getResponseTextSync = function(request_appendix) {
+		var hq = new XMLHttpRequest();
+		hq.open("POST", prefix_api + "?user=" + this.username + "&secret=" + this.passwd + "&" + request_appendix, false);
+		hq.send(null);
+		return internalParse(hq);
+	};
+	
+	// async receiver must be a function like
+	// function receiver (data).
+	// data will be a dictionary (for 'get' and 'search') or value (for 'length'/'count').
+	
+	// Internal receiver contains XMLHttpRequest object.
+	this.getResponseTextAsync = function(request_appendix, internal_receiver) {
+		var hq = new XMLHttpRequest();
+		hq.onreadystatechange = function () {
+			if (hq.readyState == 4) {
+				//console.log(hq.responseText);
+				internal_receiver(hq);
+			}
+		}
+		hq.open("POST", prefix_api + "?user=" + this.username + "&secret=" + this.passwd + "&" + request_appendix, true);
+		hq.send(null);
+	};
+	
+	this.length = function() {
+		return parseInt(JSON.parse(this.getResponseTextSync("action=count"))["count"]);
+	};
+	
+	this.lengthAsync = function(receiver) {
+		this.getResponseTextAsync("action=count", function(hq) {
+			receiver(parseInt(JSON.parse(internalParse(hq))["count"]));
+		});
+	};
+	
+	this.update = function(key, value) {
+		this.getResponseTextSync("action=update&tag=" + key + "&value=" + value);
+	};
+	
+	this.updateAsync = function(key, value) {
+		this.getResponseTextAsync("action=update&tag=" + key + "&value=" + value, function(hq) {});
+	};
+	
+	this.remove = function(key) {
+		this.getResponseTextSync("action=delete&tag=" + key);
+	}
+	
+	this.removeAsync = function(key) {
+		this.getResponseTextAsync("action=delete&tag=" + key, function(hq) {});
+	}
+	
+	this.get = function(key) {
+		return JSON.parse(this.getResponseTextSync("action=get&tag=" + key));
+	};
+	
+	this.getAsync = function(key, receiver) {
+		this.getResponseTextAsync("action=get&tag=" + key, function(hq) {
+			receiver(JSON.parse(internalParse(hq)));
+		});
+	};
+	
+	this.searchSingle = function(tag, start, count) {
+		return JSON.parse(this.getResponseTextSync("action=search" + ifdef(tag, "&tag=" + tag, "") + ifdef(start, "&no=" + start, "") + ifdef(count, "&count=" + count, "")));
+	}
+	
+	this.searchSingleAsync = function(receiver, tag, start, count) {
+		this.getResponseTextAsync("action=search" + ifdef(tag, "&tag=" + tag, "") + ifdef(start, "&no=" + start, "") + ifdef(count, "&count=" + count, ""), function(hq) {
+			receiver(JSON.parse(internalParse(hq)));
+		});
+	}
+	
+	this.search = function(tag, start, count) {
+		var temp = new Object();
+		var tl = this.length();
+		for (let i = (start ?? 1); i <= (count ?? tl); i += db_limit) {
+			Object.assign(temp, this.searchSingle(tag, i, db_limit));
+		}
+		return temp;
+	}
+	
+	this.username = username;
+	this.passwd = passwd;
+	this.length();			// Check user name and password.
+}
+	</script>
+	<script>
+	
+		function DateDiffData(day, hour, minute, second) {
+			this.day = parseInt(day);
+			this.hour = parseInt(hour);
+			this.minute = parseInt(minute);
+			this.second = parseInt(second);
+		}
+		
+		function DateDiff(d1, d2) {
+			var sec = (parseInt(d2 - d1) / 1000) % 60;
+			var min = (parseInt(d2 - d1) / 1000 / 60) % 60;
+			var hr = (parseInt(d2 - d1) / 1000 / 60 / 60) % 60;
+			var day = (parseInt(d2 - d1) / 1000 / 60 / 60 / 24);
+			return new DateDiffData(day, hr, min, sec);
+		}
+		
+		function Formats(x) {
+			if (x < 10) return "0" + x;
+			return "" + x;
+		}
+		
+		// pos e.g. [1,0]
+		function refresh(name, pos) {
+			var db = new Database("seabird", "69d9bad8");
+			for (let i = 0; i < pos.length; i++) {
+				let dname = name + pos[i];
+				db.getAsync(dname, function(res) {
+					document.getElementById(dname).innerHTML = res[dname];
+				});
+			}
+		}
+		
+		function vote(name, target) {
+			var c_spl = document.cookie.split(";");
+			for (let i = 0; i < c_spl.length; i++) {
+				let cur = c_spl[i].trim();
+				let kv = cur.split("=");
+				if (kv[0] == name && kv[1] == "1") {
+					alert("您已参加投票!");
+					return;
+				}
+			}
+			var db = new Database("seabird", "69d9bad8");
+			var dname = name + target;
+			document.cookie = name + "=1; expires=Fri, 31 Dec 9999 23:59:59 GMT;  path=/";
+			db.getAsync(dname, function (res) {
+				db.update(dname, parseInt(res[dname]) + 1);
+				refresh(dname, ["1","0"]);
+			});
+		}
+	
+		setInterval( function() {
+		
+			var clb = new Date("2022/8/31 08:00:00");
+			var cur = new Date();
+			var dif = DateDiff(cur, clb);
+			document.getElementById("countdown").innerHTML = dif.day + " 天 " + Formats(dif.hour) + " 小时 " + Formats(dif.minute) + " 分钟 " + Formats(dif.second) + " 秒";
+		
+			// Update database
+			refresh("homework_done", ["1","0"]);
+		
+		}, 1000);
+	</script>
+	<style>
+		span.imp {
+			font-weight: 700;
+		}
+		td.voter {
+			padding-left: 30px;
+			padding-right: 30px;
+		}
+	</style>
+</head>
+<body>
+	<h1>开学倒计时</h1>
+	<span>距离开学还有:</span>
+	<span class="imp" id="countdown"></span>
+	<br />
+	<h2>互动</h2>
+	<p>你的作业写完了吗?</p>
+	<table>
+		<tr>
+			<td class="voter">
+				<button onclick="vote('homework_done',1);">写完了</button>
+				<span id="homework_done1"></span>
+			</td>
+			<td class="voter">
+				<button onclick="vote('homework_done',0);">没写完</button>
+				<span id="homework_done0"></span>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
