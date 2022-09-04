@@ -1,1 +1,4 @@
-Initalizer
+UpdateServerVersion
+
+(2022.9.4)
+Update MinServer Executable File.
