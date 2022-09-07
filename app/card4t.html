@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>教师节诗歌 - 芦荟</title>
+	<meta charset="utf-8" />
+	<script>
+//https://www.programminghunter.com/article/40871496480/
+//滚动条在Y轴上的滚动距离
+function getScrollTop() {　　
+    var scrollTop = 0,
+        bodyScrollTop = 0,
+        documentScrollTop = 0;　　
+    if (document.body) {　　　　
+        bodyScrollTop = document.body.scrollTop;　　
+    }　　
+    if (document.documentElement) {　　　　
+        documentScrollTop = document.documentElement.scrollTop;　　
+    }　　
+    scrollTop = (bodyScrollTop - documentScrollTop > 0) ? bodyScrollTop : documentScrollTop;　　
+    return scrollTop;
+}
+//文档的总高度
+function getScrollHeight() {　　
+    var scrollHeight = 0,
+        bodyScrollHeight = 0,
+        documentScrollHeight = 0;　　
+    if (document.body) {　　　　
+        bodyScrollHeight = document.body.scrollHeight;　　
+    }　　
+    if (document.documentElement) {　　　　
+        documentScrollHeight = document.documentElement.scrollHeight;　　
+    }　　
+    scrollHeight = (bodyScrollHeight - documentScrollHeight > 0) ? bodyScrollHeight : documentScrollHeight;　　
+    return scrollHeight;
+}
+//浏览器视口的高度
+function getWindowHeight() {　　
+    var windowHeight = 0;　　
+    if (document.compatMode == "CSS1Compat") {　　　　
+        windowHeight = document.documentElement.clientHeight;　　
+    } else {　　　　
+        windowHeight = document.body.clientHeight;　　
+    }　　
+    return windowHeight;
+}
+
+	const scr_const = 20;
+//引用部分结束
+	var page_now = 0;
+
+	window.onscroll = function() {
+		if (getScrollTop() + getWindowHeight() >= getScrollHeight() - scr_const) {
+			// 进入下一页
+			if (page_now == 0) {
+				document.getElementById("page1").style = "display: block;";
+				page_now = 1;
+			}
+		}
+	}
+	</script>
+	<style>
+	div.contents {
+		padding-left: 4rem;
+	}
+	p.titler {
+		font-weight: 700;
+	}
+	</style>
+</head>
+<body>
+	<!-- 背景音乐 330x86 -->
+	<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="https://music.163.com/outchain/player?type=2&id=471969278&auto=1&height=66"></iframe>
+	<br />
+	<p>备注：页面仍然在测试阶段。</p>
+	<hr />
+	<div class="contents">
+		<p class="titler">芦荟</p>
+<div id="page0">
+教师节要到了，
+<br />
+想到您
+<br />
+已经陪伴了我们三年，
+<br />
+我就想到了——
+<br />
+<br />
+在我家的窗边，
+<br />
+放着几盆芦荟，
+<br />
+它们
+<br />
+平平无奇地，
+<br />
+在墙边
+<br />
+靠作一排
+<br />
+即使有时
+<br />
+忘了给它浇水，
+<br />
+它那长长的绿色叶子
+<br />
+也仍然
+<br />
+生长得飞快。
+<br />
+长着长着，
+<br />
+叶子甚至够到了窗框，
+<br />
+好像
+<br />
+沿着窗沿，
+<br />
+建成了一道风景线
+<br />
+<br />
+轻轻截下一段
+<br />
+芦荟的叶子
+<br />
+在叶子里，充满了
+<br />
+它透明的凝胶
+<br />
+再把凝胶聚在一起，它
+<br />
+就可以被涂到脸上
+<br />
+改变我们的面貌；
+<br />
+就可以加进饮料里
+<br />
+给我们带来养分
+<br />
+振作我们的精神；
+<br />
+就可以涂在伤口边
+<br />
+当我们跌倒的时候
+<br />
+使我们
+<br />
+能够修复好伤口
+<br />
+继续前行
+<br />
+</div>
+<br />
+<div id="page1" style="display: none;">
+啊，亲爱的老师！
+<br />
+您在至关重要的
+<br />
+初中三年里
+<br />
+像芦荟一样
+<br />
+为我们无私地奉献：
+<br />
+<br />
+在每一节课上
+<br />
+您给予我们
+<br />
+知识的养料；
+<br />
+在我们遇到困难时，
+<br />
+你们鼓励我们
+<br />
+继续前行，
+<br />
+战胜困难。
+<br />
+您，
+<br />
+永远是我心中
+<br />
+那株不可替代
+<br />
+而永远充满生机的
+<br />
+芦荟！
+</div>
+	<br />
+	</div>
+</body>
+</html>
