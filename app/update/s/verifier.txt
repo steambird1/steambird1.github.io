@@ -1,4 +1,7 @@
-UpdateServerVersion
+UpdateServerVersion2
+
+(2022.9.15)
+Update BlueBetter mainly.
 
 (2022.9.4)
 Update MinServer Executable File.
