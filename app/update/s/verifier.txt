@@ -1,7 +1,7 @@
-UpdateServerVersion2
+UpdateServerVersion3
+
+(2022.9.19)
+After CSP, Update MinServer and BlueBetter.
 
 (2022.9.15)
 Update BlueBetter mainly.
-
-(2022.9.4)
-Update MinServer Executable File.
