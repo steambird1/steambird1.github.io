@@ -1,4 +1,7 @@
-UpdateServerVersion3
+UpdateServerVersion4
+
+(2022.10.13)
+Update Server to Version 1.1 (Include BluePage 1.0)
 
 (2022.9.19)
 After CSP, Update MinServer and BlueBetter.
