@@ -153,6 +153,42 @@
 			}
 		}
 		
+		function search_is_prefix(name, search_str) {
+			if (search_str.length <= 2) {
+				return (name[0] == search_str[0]);	
+			} else {
+				return (name[0] == search_str[0] && name[1] == search_str[1]);	
+			}
+		}
+		
+		// 搜索相似（前缀相同）0-名称 1-绰号
+		function search_liked(name, mode) {
+			if (name.length < 1) {
+				alert("未找到符合条件人物!");
+				return;
+			}
+			var ask_if = "";
+			for (var i in persons) {
+				let matcher = "";
+				switch (mode) {
+					case 0:
+						matcher = i;
+						break;
+					case 1:
+						matcher = persons[i].nick;
+						break;
+				}
+				if (search_is_prefix(matcher, name)) {
+					ask_if += matcher + "\n";
+				}
+			}
+			if (ask_if == "") {
+				alert("未找到符合条件人物!");	
+			} else {
+				alert("未找到符合条件人物! 您要找的是不是:\n"+ask_if);
+			}
+		}
+		
 		// 搜索人物 0-名称 1-绰号
 		function search(mode) {
 			clr();
@@ -162,7 +198,7 @@
 				p = persons[document.getElementById("searchor").value];
 				name = document.getElementById("searchor").value;
 				if (p == undefined) {
-					alert("未找到符合条件人物!");
+					search_liked(name, 0);
 					return;
 				}
 				document.getElementById("nickz").innerHTML = p.nick;
@@ -181,7 +217,7 @@
 					}
 				}
 				if (p == null) {
-					alert("未找到符合条件人物!");
+					search_liked(name, 1);
 					return;
 				}
 			}
