@@ -1,0 +1,213 @@
+<!DOCTYPE HTML>
+<!-- DOCUMENT FOR PARENTS' MEETING ... -->
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<title>家长会</title>
+	<script src="https://steambird1.github.io/assets/tdjs.js">
+	</script>
+	<script>
+	
+	<!--
+	
+	var now_submit = "";
+	var md = new Database("seabird", "69d9bad8");
+	const reps = "report_s";
+	var waiting;
+	
+	function formatw(val) {
+		if (val < 10) return "0" + val;
+		return val;
+	}
+	
+	window.onload = function() {
+		const dl = new Date("2022/11/18 22:20:00");
+		//const bl = new Date("2022/11/18 16:55:00");
+		const bl = new Date("2022/11/17 22:35:00");
+		if (new Date() > dl) {
+			document.getElementById("too_late").style = "display: block;";
+			document.getElementById("errs").innerHTML = "您似乎在家长会后打开了此页面。";
+			document.getElementById("normal").style = "display: none;";
+		}
+		if (new Date() < bl) {
+			document.getElementById("too_late").style = "display: block;";
+			document.getElementById("errs").innerHTML = "您似乎在家长会前打开了此页面。请耐心等待...";
+			document.getElementById("normal").style = "display: none;";
+			waiting = setInterval(function() {
+				var diffs = bl - (new Date());
+				if (diffs <= 0) {
+					clearInterval(waiting);
+					document.getElementById("too_late").style = "display: none;";
+					document.getElementById("normal").style = "display: block;";
+				}
+				var raw_sec = parseInt(diffs / 1000);
+				var sec = raw_sec % 60;
+				var min = parseInt(raw_sec / 60) % 60;
+				var hour = parseInt(raw_sec / 3600) % 24;
+				var day = parseInt(raw_sec / 86400);
+				document.getElementById("clocks").innerHTML = "剩余时间: " + day + ":" + formatw(hour) + ":" + formatw(min) + ":" + formatw(sec);
+			}, 1000);
+		}
+		md.getAsync(reps, function (dat) {
+			document.getElementById("fs_mt_submit").style = "display: block;";
+			document.getElementById("fs_mt_loader").style = "display: none;";
+			if (dat[reps] != "null") document.getElementById("fs_rep").value = dat[reps];
+			else document.getElementById("fs_rep").value = "";
+		});
+	};
+	
+	const detailed_info = {
+		"语文":"<p>这次语文考试，我并没有遇到很大的问题。当然，我仍然发现了这些问题:</p><ul><li>古文，如果难度提高，则出现问题。</li><li>作文，可能需要考虑记叙顺序的修改与描写的提高。（我有一篇作文的修改正在进行，也许它会成为我新的素材。）</li></ul>",
+		"数学":'<p>正如我预料的一样，您会思考（或者被家长会要求思考）我数学上的问题。</p><p>目前，我思考到数学上的问题如下：</p><ul><li>计算错误问题突出。该问题至少造成了 3 分的影响。</li><li>部分几何题，对基本模型缺少敏感程度（如特殊角度）。</li><li>对部分几何题解题方法（如等面积法）缺少应用。</li></ul><p>您可能无法理解上方所提出的问题。但是，我的解决方案会也在此列出：</p><ul><li>增强对计算的练习（考前的计算训练：应当提前到日常生活中，该软件的开发正在被计划）。</li><li>加强对错题的整理与<span class="imptext">重新练习</span>（我认为这方面还要再考虑实施方式）。</li></ul>',
+		"英语":'<p>事实上，这次英语有了一定进步，但成绩也并非十分理想。关于英语的分析，请参见<a href="https://steambird1.github.io/pmc/eng.pdf">该文档</a>。我的部分英语整理在<a href="https://steambird1.github.io/app/summsys.html">这里</a> (用户名 seabirden，密码 69d9bad8)</p>',
+		"科学":"<p>这次科学考试，我并没有遇到很大的问题。当然，我仍然发现，如果难度提高，则可能出现问题。因此，我将以整理难题为主。</p>",
+		"社会":"<p>这次社会考试，我并没有遇到很大的问题。当然，我仍然发现，如果难度提高，则可能出现问题（如较冷门的表述）。因此，我将尝试整理从表述到知识点的”反查表“。具体的方案还需要进一步的研究与探讨。</p>"
+	};
+	
+	function safeReplace(origin) {
+		return origin.replace(/"/g, "“").replace(/'/g,"’");
+	}
+	
+	function learn_detail(cid) {
+		if (cid == null) {
+			document.getElementById("details_mt").style = "display: none;";
+		} else {
+			document.getElementById("details_tname").innerHTML = cid;
+			document.getElementById("details_mt").style = "display: block;";
+			document.getElementById("details_mt_content").innerHTML = detailed_info[cid];
+			document.getElementById("details_mt_submit").style = "display: none;";
+			document.getElementById("details_mt_loader").style = "display: block;";
+			var rc = "report_" + cid;
+			now_submit = rc;
+			md.getAsync(rc, function (dat) {
+				document.getElementById("details_mt_submit").style = "display: block;";
+				document.getElementById("details_mt_loader").style = "display: none;";
+				console.log(dat);
+				console.log(dat[rc]);
+				if (dat[rc] != "null") document.getElementById("details_rep").value = dat[rc];
+				else document.getElementById("details_rep").value = "";
+			});
+		}
+	}
+	
+	function subm_det() {
+		//console.log(document.getElementById("details_rep").innerHTML);
+		md.updateAsync(now_submit, safeReplace(document.getElementById("details_rep").value), function () {
+			alert("保存成功!");
+		});
+	}
+	
+	function fs_det() {
+		md.updateAsync(reps, safeReplace(document.getElementById("fs_rep").value), function () {
+			alert("保存成功!");
+		});
+	}
+	
+	//-->
+	
+	</script>
+	<style>
+	
+	.impt {
+		border-style: solid;
+	}
+	
+	.flt {
+		border-style: dotted;
+	}
+	
+	.imptext {
+		color: red;
+	}
+	
+	</style>
+</head>
+<body>
+	<h1>您好!</h1>
+	<div id="too_late" class="impt" style="display: none;">
+		<p id="errs"></p>
+		<p id="clocks">...</p>
+	</div>
+	<div id="normal">
+		<p>转眼间，九年级的第一个学期已经过了一半。</p>
+		<p>在这半个学期里，我经历了不少事情。</p>
+		<p>这些事情中的部分会在家长会时谈论，因此在此我做了一些准备。</p>
+		<p>下方的目录将方便您的查找。当然，您也可以按顺序阅读 -- 这本来就是一封信。</p>
+		<h2>目录</h2>
+		<a href="#midterm_exam">期中考试</a>
+		<br />
+		<a href="#dailys">日常行为</a>
+		<br />
+		<a href="#finishing">其它补充</a>
+		<br />
+		
+		<hr />
+		<p>我进入了九年级，学业问题自然成了最重要的话题。</p>
+		<h2 id="midterm_exam">期中考试</h2>
+		<p>以下是我的期中考试成绩。如果您想要对哪个科目了解更多/对该科目的成绩不满意/想记录您或老师对我的意见与建议，请点击科目名对应的超链接。</p>
+		<p class="imptext">按照期中考试的安排，您可能会被安排了解数学科目相关问题（因为这一科目为所有科目中最低）。点击<a href="#details_mt" onclick="learn_detail('数学');">此处</a>详细了解。</p>
+		<table>
+			<tr>
+				<th>科目</th>
+				<td><a href="#details_mt" onclick="learn_detail('语文');">语文</a></td>
+				<td><a href="#details_mt" onclick="learn_detail('数学');">数学</a></td>
+				<td><a href="#details_mt" onclick="learn_detail('英语');">英语</a></td>
+				<td><a href="#details_mt" onclick="learn_detail('科学');">科学</a></td>
+				<td><a href="#details_mt" onclick="learn_detail('社会');">社会</a></td>
+			</tr>
+			<tr>
+				<th>分数</th>
+				<td>111</td>
+				<td>102</td>
+				<td>110</td>
+				<td>157</td>
+				<td>48.5</td>
+		</table>
+		<p>(总分为 528.5；社会满分为 50 分，科学满分为 160 分，其余为 120 分)</p>
+		<div id="details_mt" class="flt" style="display: none;">
+			<h3><span id="details_tname"></span>学科具体反馈</h3>
+			<button onclick="learn_detail()">关闭</button>
+			<br />
+			<!-- JavaScript auto fill: -->
+			<h4>我想说的</h4>
+			<div id="details_mt_content">
+			
+			</div>
+			<h4>写意见/建议</h4>
+			<div id="details_mt_loader">
+				<p>请等待页面加载...</p>
+			</div>
+			<div id="details_mt_submit" style="display: none;">
+				<p>您在这里提交的内容，我将能看到。该功能需要网络连接。</p>
+				<textarea rows="5" cols="50" id="details_rep">
+				</textarea>
+				<br />
+				<button onclick="subm_det()">保存</button>
+			</div>
+		</div>
+		<br />
+		<h2 id="dailys">日常行为</h2>
+		<p>作为家长会的另一部分，日常行为（如文明礼仪）可能会被强调。</p>
+		<p>当然，”日常行为“还有另一层内涵，那就是在这个年龄段被反复提及的--早恋问题（当然，家长会上有可能不会提及，但我觉得很有可能会说）。</p>
+		<p>这个您完全不必操心--我对这个不感兴趣且深知这一行为的后果（包括成绩的影响--这也是最大的问题，以及舆论问题）。</p>
+		<br />
+		<h2 id="finishing">其它补充</h2>
+		<p>虽然在上面我写了很多，但难免有缺漏的地方，您可以在这里补充：</p>
+		<div>
+			<div id="fs_mt_loader">
+				<p>请等待页面加载...</p>
+			</div>
+			<div id="fs_mt_submit" style="display: none;">
+				<p>您在这里提交的内容，我将能看到。该功能需要网络连接。</p>
+				<textarea rows="5" cols="50" id="fs_rep">
+				</textarea>
+				<br />
+				<button onclick="fs_det()">保存</button>
+			</div>
+		</div>
+		<br />
+		<p>总而言之，我希望通过这次的家长会及上方的互动内容，我们能够互相解决存在的问题，互相进步，从而更好地面对之后的挑战，迎接美好的明天。</p>
+	</div>
+</body>
+</html>
