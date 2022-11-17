@@ -1,0 +1,441 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>英语整理</title>
+	<!-- 导入数据库组件 -->
+	<script src="https://steambird1.github.io/assets/tdjs.js">
+	</script>
+	<script>
+	<!--
+	
+	const patt_prefix = "sen_";
+	const note_prefix = "note_";
+	const page_count = 7;			// 短语页面的数量
+	const n_page_count = 20;		// 笔记页面的数量
+	const exp_page_count = 7;
+	var auto_delete = true;
+	var reach_the_end = false; 
+	var random_caller = 0;
+	
+	const disp_modules = ["patt_disp", "notes_disp", "patt_export", "notes_export"];
+	var mydb = new Database("share", "everyone");
+	
+	var mypage = 0;
+	
+	function safeReplace(origin) {
+		return origin.replace(/"/g, "“").replace(/'/g,"’");
+	}
+	
+	function disp_mode(disp_name) {
+		for (let i = 0; i < disp_modules.length; i++)
+			document.getElementById(disp_modules[i]).style = "display: none;"
+		reach_the_end = false;
+		mypage = 0;
+		document.getElementById(disp_name).style = "display: block;"
+		if (disp_name == "notes_disp") {
+			reload_notes_async();
+		}
+	}
+	
+	function show_patt_create(mode) {
+		document.getElementById("new_patt").style = "display: " + mode;
+		document.getElementById("patt_step_2").style = "display: none;";
+	}
+	
+	// 异步加载; page 从 0 开始
+	function reload_patt_async(page) {
+		var pat = document.getElementById("patt_data_d");
+		var user_prefix = document.getElementById("patt_searcher").value;
+		pat.innerHTML = "<p>请稍等...<p>";
+		//pat.innerHTML = "";
+		mydb.searchSingleAsync(function(result) {
+			let d = document.createElement("div");
+			var pat = document.getElementById("patt_data_d");
+			//console.log(result);
+			reach_the_end = true;
+			for (let i in result) {
+				reach_the_end = false;
+				let my = document.createElement("div");
+				my.innerHTML = '<p class="headliner">' + i.substr(patt_prefix.length) + '</p><p>' + result[i] + '</p>';
+				d.appendChild(my);
+			}
+			if (reach_the_end) {
+				pat.innerHTML = '<p class="warning">已经到达最后一页!</p>';
+			} else {
+				pat.innerHTML = "";
+				pat.appendChild(d);
+			}
+		}, patt_prefix + user_prefix, ifdef(page, page, mypage)*page_count+1, page_count);
+	}
+	
+	function patt_page(mode, dest) {
+		switch (mode) {
+			case 0:
+				mypage = 0;
+				break;
+			case 1:
+				if ((mypage + dest < 0) || (dest > 0 && reach_the_end)) {
+					alert("无法翻页!");
+					return;
+				}
+				mypage += dest;
+		}	
+		reload_patt_async();
+	}
+	
+	function submit_patt_create() {
+		// 提交新内容；并重新加载
+		mydb.updateAsync(patt_prefix + document.getElementById("patt_data").value, safeReplace(document.getElementById("patt_desc").value.replace(/\n/g,"<br />")), function() {
+			if (auto_delete) {
+			document.getElementById("patt_data").value = "";
+			document.getElementById("patt_desc").value = "";
+			}
+			document.getElementById("patt_state").innerHTML = "提交成功";
+			reload_patt_async();
+		});
+	}
+	
+	function export_now_sync() {
+		new Promise(function (r,rj) {var result = mydb.search(patt_prefix);
+		var ne = [];
+		for (let i in result) {
+			ne.push([i.substr(patt_prefix.length), result[i]]);
+		}
+		ne = ne.sort();
+		document.getElementById("notes_estate").innerHTML = "格式化文本..."
+		setTimeout(function() {r(ne)}, 100);
+		}).then(function (ne) {
+		var pc = document.getElementById("pe_content");
+		pc.innerHTML = "";
+		for (let i = 0; i < ne.length; i++) {
+			let my = document.createElement("div");
+			my.innerHTML = '<p class="headliner">' + ne[i][0] + '</p><p>' + ne[i][1] + '</p>';
+			pc.appendChild(my);
+		}
+		document.getElementById("pe_preprompt").style = "display: none;"
+		pc.style = "display: block;"
+		});
+	}
+	
+	function export_now() {
+		new Promise(function (r,rj) {
+			disp_mode("patt_export");
+			setTimeout(r, 100);
+		}).then(function () {
+		//(export_now_sync, 1);
+			console.log("THEN START");
+			export_now_sync();
+		});
+	}
+	
+	function export_notes_now_sync() {
+		new Promise(function (r,rj) {
+		var result = mydb.search(note_prefix);
+		var ne = [];
+		for (let i in result) {
+			ne.push([i.substr(note_prefix.length), result[i]]);
+		}
+		ne = ne.sort();
+		document.getElementById("notes_estate").innerHTML = "格式化文本..."
+		setTimeout(function() {r(ne)}, 100);
+		}).then(function (ne) {
+		var pc = document.getElementById("ne_content");
+		pc.innerHTML = "";
+		for (let i = 0; i < ne.length; i++) {
+			let my = document.createElement("div");
+			my.innerHTML = '<p class="headliner">' + ne[i][0] + '</p><p>' + ne[i][1] + '</p>';
+			pc.appendChild(my);
+		}
+		document.getElementById("ne_preprompt").style = "display: none;"
+		pc.style = "display: block;"
+		});
+	}
+	
+	function reload_notes_async(page) {
+		random_caller = 0;
+		var pat = document.getElementById("note_data_d");
+		var user_prefix = document.getElementById("notes_searcher").value;
+		pat.innerHTML = "<p>请稍等...<p>";
+		//pat.innerHTML = "";
+		mydb.searchSingleAsync(function(result) {
+			let d = document.createElement("div");
+			var pat = document.getElementById("note_data_d");
+			reach_the_end = true;
+			for (let i in result) {
+				reach_the_end = false;
+				let selfname = i.substr(note_prefix.length);
+				let my = document.createElement("div");
+				random_caller++;
+				let module = "noter_" + random_caller;
+				let linker = document.createElement("a");
+				linker.class = "reala";
+				linker.href = "#" + module;
+				linker.onclick = function() {document.getElementById(module).style = "display: block;"}; //"document.getElementById('" + module + "').style = 'display: block;'";
+				linker.innerHTML = selfname;
+				my.appendChild(linker);
+				let dataer = document.createElement("div");
+				dataer.id = module;
+				dataer.style = "display: none;";
+				let datamain = document.createElement("p");
+				datamain.innerHTML = result[i];
+				dataer.appendChild(datamain);
+				dataer.appendChild(document.createElement("br"));
+				let dataclose = document.createElement("button");
+				dataclose.class = "linebutton";
+				dataclose.innerHTML = "关闭";
+				dataclose.onclick = function() {document.getElementById(module).style = "display: none;"};
+				let dataedit = document.createElement("button");
+				dataedit.class = "linebutton";
+				dataedit.innerHTML = "编辑";
+				dataedit.onclick = function() {document.getElementById("note_adder").value = selfname; note_new_show(); note_add_next();};
+				dataer.appendChild(dataedit);
+				dataer.appendChild(dataclose);
+				my.appendChild(dataer);
+				my.appendChild(document.createElement("br"));
+				d.appendChild(my);
+			}
+			if (reach_the_end) {
+				pat.innerHTML = '<p class="warning">已经到达最后一页!</p>';
+			} else {
+				pat.innerHTML = "";
+				pat.appendChild(d);
+			}
+		}, note_prefix + user_prefix, ifdef(page, page, mypage)*n_page_count+1, n_page_count);
+	}
+	
+	function note_page(mode, dest) {
+		switch (mode) {
+			case 0:
+				mypage = 0;
+				break;
+			case 1:
+				if ((mypage + dest < 0) || (dest > 0 && reach_the_end)) {
+					alert("无法翻页!");
+					return;
+				}
+				mypage += dest;
+		}	
+		reload_notes_async();
+	}
+	
+	function note_add_next() {
+		var mykey = note_prefix + document.getElementById("note_adder").value;
+		mydb.getAsync(mykey, function(result) {
+			var res = result[mykey];
+			if (res != "null") {
+				document.getElementById("notes_texts").value = safeReplace(res.replace(/<br \/>/g,"\n"));
+			}
+			document.getElementById("notes_step_2").style = "display: block;";
+		});
+	}
+	
+	function patt_add_next() {
+		var mykey = patt_prefix + document.getElementById("patt_data").value;
+		mydb.getAsync(mykey, function(result) {
+			var res = result[mykey];
+			if (res != "null") {
+				document.getElementById("patt_desc").value = safeReplace(res.replace(/<br \/>/g,"\n"));
+			}
+			document.getElementById("patt_step_2").style = "display: block;";
+		});
+	}
+	
+	function note_submit_new() {
+		mydb.updateAsync(note_prefix + document.getElementById("note_adder").value, safeReplace(document.getElementById("notes_texts").value.replace(/\n/g,"<br />")), function() {
+			if (auto_delete) {
+			document.getElementById("note_adder").value = "";
+			document.getElementById("notes_texts").value = "";
+			}
+			document.getElementById("note_state").innerHTML = "提交成功";
+			reload_notes_async();
+		});
+	}
+	
+	function note_new_close() {
+		document.getElementById("notes_step_2").style = "display: none;";
+		document.getElementById("new_notes").style = "display: none;";
+	}
+	
+	function note_new_show() {
+		document.getElementById("new_notes").style = "display: block;";
+	}
+	
+	function note_export_now() {
+		new Promise(function (r,rj) {
+			disp_mode("notes_export");
+			setTimeout(r, 100);
+		}).then(function () {
+			export_notes_now_sync();
+		});
+	}
+	
+	function logins(mode) {
+		try {
+			switch (mode) {
+			case 0:
+			mydb = new Database(document.getElementById("username").value, document.getElementById("passwd").value);
+			break;
+			case 1:
+			mydb = new Database("share", "everyone");
+			}
+			reload_patt_async();
+			document.getElementById("unlogged").style = "display: none;"
+			document.getElementById("logged").style = "display: block;"
+		} catch (e) {
+			document.getElementById("log_warn").innerHTML = "登录失败，请检查用户名、密码及网络连接：" + e.toString();
+		}
+	}
+	function register() {
+		document.getElementById("register_description").style = "display: block;";
+	}
+	function close_register() {
+		document.getElementById("register_description").style = "display: none;"
+	}
+	function patt_verify() {
+		document.getElementById("patt_data").value = safeReplace(document.getElementById("patt_data").value);
+	}
+	function notes_verify() {
+		document.getElementById("note_adder").value = safeReplace(document.getElementById("note_adder").value);
+	}
+	//-->
+	</script>
+	<style>
+		.sumodes {
+			padding-left: 45px;
+		}
+		.linebutton {
+			margin-right: 45px;
+		}
+		.linestate {
+			padding-right: 45px;
+			color: blue;
+		}
+		.headliner {
+			font-weight: 700;
+		}
+		.warning {
+			color: red;
+		}
+		.linewarning {
+			padding-right: 45px;
+			color: red;
+		}
+		.reala {
+			text-decoration: underline;
+			color: blue;
+		}
+	</style>
+</head>
+<body>
+	<h1>英语整理系统</h1>
+	<div id="unlogged">
+		<span>用户名:</span>
+		<input type="text" id="username" />
+		<br />
+		<span>密码</span>
+		<input type="password" id="passwd" />
+		<br />
+		<button onclick="logins(0)" class="linebutton">登录</button>
+		<button onclick="register()" class="linebutton">注册</button>
+		<span class="linewarning" id="log_warn"></span>
+		<div id="register_description" style="display: none;">
+			<p class="headliner">注册说明</p>
+			<p>为避免不同用户数据之间的混乱，英语整理系统需要一个 <a href="http://tinywebdb.appinventor.space/"> TinyWebDb 数据库 </a> 才能运行。</p>
+			<p>在上述网站可以注册数据库账号，然后需要使用登陆后界面中的 user 和 secret (<span class="warning"> 不是注册的密码！ </span>) 作为用户名和密码登录。</p>
+			<p>您也可以<a href="#logged" onclick="logins(1)">登录共享账号</a>体验功能。(<span class="warning"> 共享账号的内容可能会被数据库提供商定期清除！ </span>)</p>
+			<button onclick="close_register()">关闭</button>
+		</div>
+	</div>
+	<div id="logged" style="display: none;">
+	<table>
+		<tr>
+			<td>
+				<input type="radio" class="sumodes" name="sumode" id="patt" onclick="disp_mode('patt_disp');" checked="checked" />
+				<span>句型/词组整理</span>
+			</td>
+			<td>
+				<input type="radio" class="sumodes" name="sumode" onclick="disp_mode('notes_disp');" id="notes" />
+				<span>笔记</span>
+			</td>
+		</tr>
+	</table>
+	<div id="patt_disp">
+		<button onclick="show_patt_create('block');">新建/修改...</button>
+		<div id="new_patt" style="display: none;">
+			<span>词组/句型内容:</span>
+			<input type="text" id="patt_data" onchange="patt_verify()" onblur="patt_add_next()" />
+			<br />
+			<div id="patt_step_2" style="display: none;">
+			<p>词组/句型解释：</p>
+			<textarea id="patt_desc">
+			</textarea>
+			<br />
+			<button class="linebutton" onclick="submit_patt_create();">提交</button>
+			<span class="linestate" id="patt_state"></span>
+			</div>
+			<button class="linebutton" onclick="show_patt_create('none');">关闭</button>
+		</div>
+		<br />
+		<input type="text" id="patt_searcher" />
+		<button onclick="patt_page(0)">搜索</button>
+		<div id="patt_data_d">
+		
+		</div>
+		<button class="linebutton" onclick="patt_page(1,-1)">上一页</button>
+		<button class="linebutton" onclick="patt_page(1,1)">下一页</button>
+		<button class="linebutton" onclick="patt_page(0)">第一页</button>
+		<button class="linebutton" onclick="export_now()">导出所有</button>
+	</div>
+	<div id="patt_export" style="display: none;">
+		<div id="pe_preprompt">
+			<p>正在导出... 这可能会花费一些时间。</p>
+			<p id="mystate" class="linestate">从网络获取数据...</p>
+		</div>
+		<div id="pe_content" style="display: none;">
+			
+		</div>
+	</div>
+	<div id="notes_disp" style="display: none;">
+		<button onclick="note_new_show()">新建/修改...</button>
+		<div id="new_notes" style="display: none;">
+			<div id="notes_step_1">
+				<span>输入名称:</span>
+				<input type="text" id="note_adder" onchange="notes_verify()" onblur="note_add_next()" />
+			</div>
+			<div id="notes_step_2" style="display: none;">
+				<p>输入内容:</p>
+				<textarea id="notes_texts">
+				</textarea>
+				<br />
+				<button onclick="note_submit_new()" class="linebutton">提交</button>
+				<span class="linestate" id="note_state"></span>
+			</div>
+			<br />
+			<button onclick="note_new_close()">关闭</button>
+		</div>
+		<br />
+		<input type="text" id="notes_searcher" />
+		<button onclick="note_page(0)">搜索</button>
+		<!--
+		每一个是 <a>，引导打开一个含有内容的 hidden div
+		-->
+		<div id="note_data_d">
+			
+		</div>
+		<button class="linebutton" onclick="note_page(1,-1)">上一页</button>
+		<button class="linebutton" onclick="note_page(1,1)">下一页</button>
+		<button class="linebutton" onclick="note_page(0)">第一页</button>
+		<button class="linebutton" onclick="note_export_now()">导出所有</button>
+	</div>
+	<div id="notes_export" style="display: none;">
+		<div id="ne_preprompt">
+			<p>正在导出... 这可能会花费一些时间。</p>
+			<p id="notes_estate" class="linestate">从网络获取数据...</p>
+		</div>
+		<div id="ne_content" style="display: none;">
+			
+		</div>
+	</div>
+</body>
+	</div>
+</html>
