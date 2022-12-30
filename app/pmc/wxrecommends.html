@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>提交建议</title>
+	<script src="https://steambird1.github.io/assets/tdjs.js">
+	</script>
+	<script>
+	
+	var mdb = new Database("seabird", "69d9bad8");
+	const seg_prefix = "wx_recommend_";
+	const ans_prefix = "wx_answer_";
+	
+	function rid() {
+		return Math.floor(Math.random()*1000000);
+	}
+	
+	function have_key(kname) {
+		var recs = mdb.get(kname)[kname];
+		if (recs == null || recs == "null") return false;
+		return true;
+	}
+	
+	function sub_rec() {
+		new Promise(function(r,rj){r();}).then(function(ex){
+			var curid;
+			do {
+				curid = rid();
+			} while (have_key(seg_prefix + curid));
+			mdb.updateAsync(seg_prefix + curid, document.getElementById("sub_text").value, function() {
+				document.getElementById("sub_qid").innerHTML = "提交成功！查询号码是: " + curid;
+			});
+		});
+	}
+	
+	function que_rec() {
+		new Promise(function(r,rj){r();}).then(function(ex){
+			var qn = document.getElementById("query_num").value;
+			var mk = seg_prefix + qn;
+			var ak = ans_prefix + qn;
+			if (have_key(mk)) {
+				mdb.getAsync(mk, function(data) {
+					document.getElementById("query_report").innerHTML = data[mk];
+					if (have_key(ak)) {
+						document.getElementById("ans_stat").innerHTML = '<span style="color: green;">已答复</span>';
+						mdb.getAsync(ak, function(data) {
+							document.getElementById("ans_content").innerHTML = data[ak];
+						});
+					} else {
+						document.getElementById("ans_stat").innerHTML = '<span style="color: red;">暂无答复</span>';
+					}
+				});
+			} else {
+				alert("查询号码无效！");
+			}
+		});
+	}
+	
+	</script>
+	<style>
+	.outs {
+		color: blue;
+	}
+	</style>
+</head>
+<body>
+	<h1>欢迎提交您的建议!</h1>
+	<br />
+	<h2>查询反馈</h2>
+	<span>查询号码: </span>
+	<input type="text" id="query_num" />
+	<button onclick="que_rec()">查询</button>
+	<br />
+	<p>您的建议:</p>
+	<p id="query_report" class="outs"></p>
+	<p>答复状态: <span id="ans_stat"></span></p>
+	<p id="ans_content" class="outs"></p>
+	<hr />
+	<h2>提交建议</h2>
+	<textarea rows="10" cols="50" id="sub_text">
+	</textarea>
+	<button onclick="sub_rec()">提交</button>
+	<br />
+	<p id="sub_qid" class="outs"></p>	<!-- 在这里显示反馈号码 -->
+</body>
+</html>
