@@ -1,0 +1,253 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script>
+		// 时间范围处理
+		const yconst = "yms_name";
+		const yqconst = "yms_query_2023_";
+		const forever = "Thu Nov 04 2077 05:14:00 GMT";
+
+		var ranges = [];
+		var matches = {}; // 加入 input textbox (key: ranges, value: input)
+		var myname = "";
+
+		var database = null;
+
+		function panic(err) {
+			document.getElementById("errdisp").innerHTML = err.toString();
+			try {
+				if (window.navigator.userAgent.indexOf("Safari") < 0)
+					disp("safari_error", false);
+			} catch (e) {
+				// No catch
+			}
+			disp("initial_name", false);
+			disp("questions", false);
+			disp("fatal", true);
+		}
+
+		function disp(div, state) {
+			document.getElementById(div).style = "display: " + (state ? "block" : "none");
+		}
+
+		function dvalue(inputter) {
+			return document.getElementById(inputter).value;
+		}
+
+		// 自然书写
+		function push_date(month, day) {
+			let d = new Date(2023,month-1,day);
+				if (d.getDay() > 0) {
+					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
+					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
+				}
+		}
+
+		window.onload = function() {
+
+			try {
+				database = new Database("ymsdb", "081f0a30");
+
+			} catch (e) {
+				panic(e);
+			}
+
+			for (let i = 5; i <= 31; i++) {
+				push_date(7,i);
+			}
+			for (let i = 1; i <= 19; i++) {
+				push_date(8,i);
+			}
+			// 渲染位置
+			let dobj = document.getElementById("generators");
+			for (let i = 0; i < ranges.length; i++) {
+				let thisobj = document.createElement("input");
+				let thisdesc = document.createElement("span");
+				thisobj.type = "checkbox";
+				thisobj.checked = false;
+				thisdesc.innerHTML = ranges[i];
+				matches[ranges[i]] = thisobj;
+				dobj.appendChild(thisobj);
+				dobj.appendChild(thisdesc);
+				dobj.appendChild(document.createElement("br"));
+			}
+			
+			// 确认此前 yms name
+
+			try {
+				let dc = document.cookie.split(';');
+				for (let i = 0; i < dc.length; i++) {
+					let va = dc[i].split('=');
+					if (va[0] == yconst) {
+						myname = va[1].trim();
+						name_nextstep_int();
+						break;
+					}
+				}
+				let pg = document.getElementById("progid");
+				pg.max = ranges.length;
+			} catch (e) {
+				panic(e);
+			}
+
+			
+		}
+
+		function resetall() {
+			for (let i = 0; i < ranges.length; i++) {
+				matches[ranges[i]].checked = false;
+			}
+		}
+
+		function name_nextstep_int(donot_allow_desire) {
+			document.getElementById("revertor").onclick = function () {name_nextstep_int(); };
+			disp("initial_name", false);
+			disp("waiter", true);
+			var strike = false;
+			let dkey = yqconst + myname + "_allow_desire";
+			setTimeout(function() {
+				try {
+
+					let si = null;
+					si = setInterval(function() {
+						if (pg.value == ranges.length) {
+							disp("waiter", false);
+							disp("questions", true);
+							document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
+							document.getElementById("studdisp").innerHTML = myname;
+							database.updateAsync(dkey, "0");
+							clearInterval(si);
+						}
+					}, 500);
+					
+					let pg = document.getElementById("progid");
+					pg.value = 0;
+					for (let i = 0; i < ranges.length; i++) {
+
+						let key = yqconst + ranges[i] + "_" + myname;
+						//console.log(database.get(key)[key]);//debugger.
+						database.getAsync(key, function(rec) {
+							if (strike) return;
+							pg.value++;
+							
+							if (rec[key] == "1") {
+								if (donot_allow_desire) {
+									
+									database.getAsync(dkey, function (desire_rec) {
+										if (desire_rec[dkey] != "1") {
+											clearInterval(si);
+											//alert("该姓名已被填报，请使用填报时的设备登陆该填报系统！");
+											document.getElementById("desire_error").innerHTML = "该姓名已被填报，请使用填报时的设备登陆该填报系统！";
+											strike = true;
+											disp("waiter", false);
+											disp("initial_name", true);
+										} else {
+											document.getElementById("desire_notify").innerHTML = "该账户已被暂时允许在多个设备填报，该设备及此前所用的设备此后仍然可以进行填报。此后请注意在同一设备填报，避免信息问题！";
+											
+										}
+									});
+									
+								}
+								matches[ranges[i]].checked = true;
+							}
+							//matches.push(thisobj);
+							
+						});
+
+						if (strike) {
+							break;
+						}
+						
+					}
+					
+					
+				} catch (e) {
+					panic(e);
+				}
+			}, 100);
+		}
+
+		function name_nextstep() {
+			if (confirm("注意：姓名一经确认，无法修改！是否继续？")) {
+				myname = dvalue("studname");
+				name_nextstep_int(true);
+			}
+		}
+
+		function submitter() {
+			document.getElementById("revertor").onclick = function () {questions(); };
+			disp("questions", false);
+			disp("waiter", true);
+			setTimeout(function() {
+				let pg = document.getElementById("progid");
+				pg.value = 0;
+
+				for (let i = 0; i < ranges.length; i++) {
+					let toput = matches[ranges[i]].checked ? "1" : "0";
+					database.updateAsync(yqconst + ranges[i] + "_" + myname, toput, function() {
+						pg.value++;
+					});
+				}
+				let si = null;
+				si = setInterval(function() {
+					if (pg.value == ranges.length) {
+						disp("waiter", false);
+						disp("questions", true);
+						alert("提交成功！");
+						clearInterval(si);
+					}
+				}, 500);
+			}, 100);
+		}
+	</script>
+	<script src="http://steambird1.github.io/assets/tdjs.js">
+	</script>
+	<title>云美术 - 报名时间填写</title>
+	<style>
+		.warn {
+			color: red;
+		}
+	</style>
+</head>
+<body>
+	<strong>云美术 - 报名时间填写</strong>
+	<hr />
+	<div id="fatal" style="display: none;">
+		<strong class="warn">页面出现严重错误。</strong>
+		<hr />
+		<p>您可能需要检查网络连接。如果网络连接正常，那么：</p>
+		<p>这可能是由于选择了不兼容的浏览器导致的。<span class="warn" id="safari_error">该填报系统不支持 Safari 浏览器。如果您使用的是 Safari，那么您需要更换浏览器。</span>
+		<p>否则，您可以<a href="#">刷新</a>再试。</p>
+		<p>点击<a href="javascript:void(0);" id="revertor" onclick="alert('对不起，该步骤无法恢复。');">此处</a>可重试上一步。</p>
+		<p>问题信息：<span id="errdisp"></span></p>
+	</div>
+	<div id="initial_name">
+		<p>第 1 步：输入学生姓名</p>
+		<span>学生姓名：</span>
+		<input type="text" id="studname" />
+		<br />
+		<p class="warn">警告：姓名在确认后无法修改，此后只能在同一设备上填报！</p>
+		<hr />
+		<p class="warn" id="desire_error"></p>
+		<button onclick="name_nextstep();">下一步</button>
+	</div>
+	<div id="waiter" style="display: none;">
+		<p>请稍等... 正在与数据库连接。进度条可能显示连接进度。</p>
+		<progress id="progid"></progress>
+		<p>如果始终未出现下一步页面，请检查网络连接或<a href="#">刷新</a>页面。</p>
+	</div>
+	<div id="questions" style="display: none;">
+		<p>第 2 步：填写学生<strong id="studdisp"></strong>的信息</p>
+		<p style="color: blue;" id="desire_notify"></p>
+		<p class="warn">注意：当前显示的即为您的填报情况。<br />只有点击“提交”按钮后，数据才会更新。</p>
+		<p>选择该学生前来上课的时间：</p>
+		<button onclick="resetall();">重置</button>
+		<br />
+		<div id="generators">
+			<!-- 自动填充 -->
+		</div>
+		<button onclick="submitter();">提交</button>
+	</div>
+</body>
+</html>
