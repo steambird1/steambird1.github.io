@@ -42,6 +42,9 @@
 				if (d.getDay() > 0) {
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
+					return 1;
+				} else {
+					return 0;	
 				}
 		}
 
@@ -53,9 +56,8 @@
 			} catch (e) {
 				panic(e);
 			}
-
 			for (let i = 5; i <= 31; i++) {
-				push_date(7,i);
+				period_cnt += push_date(7,i);
 			}
 			for (let i = 1; i <= 19; i++) {
 				push_date(8,i);
@@ -69,6 +71,11 @@
 				thisobj.checked = false;
 				thisdesc.innerHTML = ranges[i];
 				matches[ranges[i]] = thisobj;
+				if (i % 20 == 0) {
+					let perioder = document.createElement("strong");
+					perioder.innerHTML = "第 " + (i / 20 + 1) + " 期";
+					dobj.appendChild(perioder);
+				}
 				dobj.appendChild(thisobj);
 				dobj.appendChild(thisdesc);
 				dobj.appendChild(document.createElement("br"));
@@ -246,7 +253,7 @@
 		<div id="generators">
 			<!-- 自动填充 -->
 		</div>
-		<button onclick="submitter();">提交</button>
+		<button onclick="submitter();" style="font-size: 36px;">提交</button>
 	</div>
 </body>
 </html>
