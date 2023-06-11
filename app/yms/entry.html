@@ -57,7 +57,7 @@
 				panic(e);
 			}
 			for (let i = 5; i <= 31; i++) {
-				period_cnt += push_date(7,i);
+				push_date(7,i);
 			}
 			for (let i = 1; i <= 19; i++) {
 				push_date(8,i);
@@ -72,9 +72,11 @@
 				thisdesc.innerHTML = ranges[i];
 				matches[ranges[i]] = thisobj;
 				if (i % 20 == 0) {
+					dobj.appendChild(document.createElement("hr"));
 					let perioder = document.createElement("strong");
 					perioder.innerHTML = "第 " + (i / 20 + 1) + " 期";
 					dobj.appendChild(perioder);
+					dobj.appendChild(document.createElement("br"));
 				}
 				dobj.appendChild(thisobj);
 				dobj.appendChild(thisdesc);
