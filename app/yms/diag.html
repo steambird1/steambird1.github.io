@@ -6,8 +6,14 @@
     <script>
 
        // <!--
+
+      var result = false;
     function tester(a,b) {
-      this.member = a ?? b;
+      try {
+        this.member = a ?? b;
+      } catch (e) {
+        result = true;
+      }
     }
       
     window.onload = function() {
@@ -15,16 +21,17 @@
       var v2 = "OK";
       var v3 = "OK";
       var standard = "OK";
-      var result = false;
-      try {
-        var res1 = v1 ?? v2;
-        var res2 = v2 ?? v3;
-        var res3 = v1 ?? v3;
-        if ((res1 != standard) || (res2 != standard) || (res3 != standard)) result = true;
-        var res4 = new tester(null,2);
-        if (res4.member != 2) result = true;
-      } catch (e) {
-        result = true;
+      if (!result) {
+        try {
+          var res1 = v1 ?? v2;
+          var res2 = v2 ?? v3;
+          var res3 = v1 ?? v3;
+          if ((res1 != standard) || (res2 != standard) || (res3 != standard)) result = true;
+          var res4 = new tester(null,2);
+          if (res4.member != 2) result = true;
+        } catch (e) {
+          result = true;
+        }
       }
 
       if (result) {
