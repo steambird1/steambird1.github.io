@@ -92,7 +92,7 @@
 					let va = dc[i].split('=');
 					if (va[0] == yconst) {
 						myname = va[1].trim();
-						name_nextstep_int();
+						if (myname.length() > 0) name_nextstep_int();
 						break;
 					}
 				}
@@ -182,7 +182,7 @@
 		}
 
 		function name_nextstep() {
-			if (confirm("注意：姓名一经确认，无法修改！是否继续？")) {
+			if (confirm("请仔细检查姓名是否正确，避免错误填为他人信息！是否继续？")) {
 				myname = dvalue("studname");
 				name_nextstep_int(true);
 			}
