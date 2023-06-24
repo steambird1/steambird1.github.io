@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>云美术</title>
+    <script>
+
+       // <!--
+    function tester(a,b) {
+      this.member = a ?? b;
+    }
+      
+    window.onload = function() {
+      var v1 = null;
+      var v2 = "OK";
+      var v3 = "OK";
+      var standard = "OK";
+      var result = false;
+      try {
+        var res1 = v1 ?? v2;
+        var res2 = v2 ?? v3;
+        var res3 = v1 ?? v3;
+        if ((res1 != standard) || (res2 != standard) || (res3 != standard)) result = true;
+        var res4 = new tester(null,2);
+        if (res4.member != 2) result = true;
+      } catch (e) {
+        result = true;
+      }
+
+      if (result) {
+        document.getElementById("result").innerHTML = "很抱歉，您需要重新填报。系统将自动跳转 ...";
+        setTimeout(function() {
+          window.location.href = "https://steambird1.github.io/app/yms/entry.html";
+        }, 3000);
+      } else {
+        document.getElementById("result").innerHTML = "您的设备中暂未发现问题，您不需要重新填报。<br />如果您希望检查填报情况，您可以重新进入<a href=\"https://steambird1.github.io/app/yms/entry.html\">填报系统</a>并查看您所填报的日期是否被自动勾选。";
+      }
+    }
+
+     // -->
+    </script>
+  </head>
+  <body>
+    <strong>兼容性测试</strong>
+    <p>该页面将自动检查您的数据是否正确提交，第一步不需要您进行额外操作。下面将显示结果。</p>
+    <hr />
+    <p id="result"></p>
+  </body>
+</html>
