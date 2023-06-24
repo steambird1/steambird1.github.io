@@ -103,7 +103,11 @@ function Database(username, passwd) {
 	this.search = function(tag, start, count) {
 		var temp = new Object();
 		var tl = this.length();
-		for (let i = (start ?? 1); i <= (count ?? tl); i += db_limit) {
+		var starter = start;
+		var counter = count;
+		if (start == null) starter = 1;
+		if (count == null) counter = tl;
+		for (let i = starter; i <= counter; i += db_limit) {
 			Object.assign(temp, this.searchSingle(tag, i, db_limit));
 		}
 		return temp;
