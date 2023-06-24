@@ -112,15 +112,16 @@
 		}
 
 		function name_nextstep_int(donot_allow_desire) {
-			document.getElementById("revertor").onclick = function () {name_nextstep_int(); };
+			document.getElementById("revertor").onclick = function () {name_nextstep_int(donot_allow_desire); };
 			disp("initial_name", false);
 			disp("waiter", true);
 			var strike = false;
 			let dkey = yqconst + myname + "_allow_desire";
 			setTimeout(function() {
+				let si = null;
 				try {
 
-					let si = null;
+					
 					si = setInterval(function() {
 						if (pg.value == ranges.length) {
 							disp("waiter", false);
@@ -174,6 +175,7 @@
 					
 					
 				} catch (e) {
+					clearInterval(si);
 					panic(e);
 				}
 			}, 100);
@@ -187,28 +189,33 @@
 		}
 
 		function submitter() {
-			document.getElementById("revertor").onclick = function () {questions(); };
+			document.getElementById("revertor").onclick = function () { submitter(); /* questions(); */ };
 			disp("questions", false);
 			disp("waiter", true);
 			setTimeout(function() {
-				let pg = document.getElementById("progid");
-				pg.value = 0;
-
-				for (let i = 0; i < ranges.length; i++) {
-					let toput = matches[ranges[i]].checked ? "1" : "0";
-					database.updateAsync(yqconst + ranges[i] + "_" + myname, toput, function() {
-						pg.value++;
-					});
-				}
 				let si = null;
-				si = setInterval(function() {
-					if (pg.value == ranges.length) {
-						disp("waiter", false);
-						disp("questions", true);
-						alert("提交成功！");
-						clearInterval(si);
+				try {
+					let pg = document.getElementById("progid");
+					pg.value = 0;
+	
+					for (let i = 0; i < ranges.length; i++) {
+						let toput = matches[ranges[i]].checked ? "1" : "0";
+						database.updateAsync(yqconst + ranges[i] + "_" + myname, toput, function() {
+							pg.value++;
+						});
 					}
-				}, 500);
+					si = setInterval(function() {
+						if (pg.value == ranges.length) {
+							disp("waiter", false);
+							disp("questions", true);
+							alert("提交成功！");
+							clearInterval(si);
+						}
+					}, 500);
+				} catch (e) {
+					clearInterval(si);
+					panic(e);
+				}
 			}, 100);
 		}
 	</script>
