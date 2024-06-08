@@ -112,6 +112,24 @@ function Database(username, passwd) {
 		}
 		return temp;
 	}
+
+	this.searchAsync = function(tag, receiver, start, count, extra) {
+		var tl = this.length();
+		var starter = start;
+		var counter = count;
+		if (start == null) starter = 1;
+		if (count == null) counter = tl;
+		if (extra == null) extra = new Object();
+		if (counter <= 0) {
+			receiver(extra);
+			return;
+		}
+		var ts = this;
+		this.searchSingleAsync(function(cur) {
+			Object.assign(extra, cur);
+			ts.searchAsync(tag, receiver, starter+db_limit, counter-db_limit, extra);
+		}, tag, start, db_limit);
+	}
 	
 	this.username = username;
 	this.passwd = passwd;
