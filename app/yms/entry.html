@@ -41,7 +41,7 @@
 
 		// 自然书写
 		function push_date(month, day) {
-			let d = new Date(2023,month-1,day);
+			let d = new Date(2024,month-1,day);
 				if (d.getDay() != 6) {
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
@@ -74,11 +74,11 @@
 				thisobj.checked = false;
 				thisdesc.innerHTML = ranges[i];
 				matches[ranges[i]] = thisobj;
-				if (i % 20 == 0) {
-					dobj.appendChild(document.createElement("hr"));
-					let perioder = document.createElement("strong");
-					perioder.innerHTML = "第 " + (i / 20 + 1) + " 期";
-					dobj.appendChild(perioder);
+				if (i % 2 == 0) {
+					//dobj.appendChild(document.createElement("hr"));
+					//let perioder = document.createElement("strong");
+					//perioder.innerHTML = "第 " + (i / 20 + 1) + " 期";
+					//dobj.appendChild(perioder);
 					dobj.appendChild(document.createElement("br"));
 				}
 				dobj.appendChild(thisobj);
