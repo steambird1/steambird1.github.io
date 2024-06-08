@@ -42,7 +42,7 @@
 		// 自然书写
 		function push_date(month, day) {
 			let d = new Date(2023,month-1,day);
-				if (d.getDay() > 0) {
+				if (d.getDay() != 6) {
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
 					return 1;
