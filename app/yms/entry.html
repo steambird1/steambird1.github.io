@@ -134,17 +134,31 @@
 						if (strike) return;
 						pg.value++;
 						
+						var finalstep = function() {
+							res = rec[key].split(",");
+							for (let i = 0; i < res.length; i++) {
+								if (res[i].trim() == "1") matches[ranges[i]].checked = true;
+								else matches[ranges[i]].checked = false;
+							}
+							disp("waiter", false);
+							disp("questions", true);
+							document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
+							document.getElementById("studdisp").innerHTML = myname;
+							database.updateAsync(dkey, "0");
+						};
+						
 						if (rec[key] != "null") {
 							if (donot_allow_desire) {
 								
 								database.getAsync(dkey, function (desire_rec) {
-									//if (!force_desire) {
-										clearInterval(si);
+									let force_desire = (desire_rec[dkey] == "1");
+									if (!force_desire) {
+									//	clearInterval(si);
 										//alert("该姓名已被填报，请使用填报时的设备登陆该填报系统！");
 										//document.getElementById("desire_error").innerHTML = "该姓名已被填报。<br />是否一定要修改？";
-									document.getElementById("studname").disabled = true;	
-									disp("desire_window", true);
-									disp("nextstepper", false);
+										document.getElementById("studname").disabled = true;	
+										disp("desire_window", true);
+										disp("nextstepper", false);
 										strike = true;
 										disp("waiter", false);
 										disp("initial_name", true);
@@ -152,24 +166,22 @@
 									//	document.getElementById("desire_notify").innerHTML = "您正在修改学生的信息！";
 									//	
 									//}
+									} else {
+										finalstep();
+										
+									}
 								});
 								
+							} else {
+								finalstep();
 							}
 							//matches[ranges[i]].checked = true;
-							res = rec[key].split(",");
-							for (let i = 0; i < res.length; i++) {
-								if (res[i].trim() == "1") matches[ranges[i]].checked = true;
-								else matches[ranges[i]].checked = false;
-							}
+							
+						} else {
+							finalstep();
 						}
 						//matches.push(thisobj);
-						if (!strike) {
-							disp("waiter", false);
-							disp("questions", true);
-							document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
-							document.getElementById("studdisp").innerHTML = myname;
-							database.updateAsync(dkey, "0");
-						}
+						
 					});
 
 				} catch (e) {
