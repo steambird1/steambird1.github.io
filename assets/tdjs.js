@@ -113,22 +113,51 @@ function Database(username, passwd) {
 		return temp;
 	}
 
-	this.searchAsync = function(tag, receiver, start, count, extra) {
-		var tl = this.length();
+	this.searchAsync = function(tag, receiver, start, count, retry_cont, extra) {
+		if (retry_cont == null) retry_cont = 5;
+		var logging = false;
+		if (retry_cont < 0) {
+			logging = true;
+			retry_cont = -retry_cont;
+		}
+		var tl = 0;
+		var ts = this, err = null;
+		for (let i = 0; i < retry_cont; i++) {
+			try {
+				tl = this.length();
+				err = null;
+				break;
+			} catch (e) {
+				err = e;
+				if (logging) console.log("[tdjs] Error in async search initialization: "+e+" ("+(i+1)+"/"+retry_cont+" attempts)");
+			}
+		}
+		if (err != null) throw err;
 		var starter = start;
 		var counter = count;
 		if (start == null) starter = 1;
 		if (count == null) counter = tl;
 		if (extra == null) extra = new Object();
+		
 		if (counter <= 0) {
 			receiver(extra);
 			return;
 		}
-		var ts = this;
-		this.searchSingleAsync(function(cur) {
-			Object.assign(extra, cur);
-			ts.searchAsync(tag, receiver, starter+db_limit, counter-db_limit, extra);
-		}, tag, start, db_limit);
+		
+		for (let i = 0; i < retry_cont; i++) {
+			try {
+				this.searchSingleAsync(function(cur) {
+					Object.assign(extra, cur);
+					ts.searchAsync(tag, receiver, starter+db_limit, counter-db_limit, retry_cont, extra);
+				}, tag, start, db_limit);
+				err = null;
+				break;
+			} catch (e) {
+				err = e;
+				if (logging) console.log("[tdjs] Error in async search: "+e+" ("+(i+1)+"/"+retry_cont+" attempts)");
+			}
+		}
+		if (err != null) throw err;
 	}
 	
 	this.username = username;
