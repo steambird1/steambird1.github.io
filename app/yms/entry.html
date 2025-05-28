@@ -9,7 +9,7 @@
 		
 		// 时间范围处理
 		const yconst = "yms_name";
-		const yqconst = "yms_query_2024_";		// Modified...
+		const yqconst = "yms_query_2025_";		// Modified...
 		const forever = "Thu Nov 04 2077 05:14:00 GMT";
 
 		var ranges = [];
@@ -41,7 +41,7 @@
 
 		// 自然书写
 		function push_date(month, day) {
-			let d = new Date(2024,month-1,day);
+			let d = new Date(2025,month-1,day);
 				if (d.getDay() != 6) {
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
 					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
@@ -59,10 +59,10 @@
 			} catch (e) {
 				panic(e);
 			}
-			for (let i = 5; i <= 31; i++) {
+			for (let i = 6; i <= 31; i++) {
 				push_date(7,i);
 			}
-			for (let i = 1; i <= 16; i++) {
+			for (let i = 1; i <= 15; i++) {
 				push_date(8,i);
 			}
 			// 渲染位置
