@@ -158,7 +158,7 @@
 							//matches[ranges[i]].checked = true;
 							res = rec[key].split(",");
 							for (let i = 0; i < res.length; i++) {
-								if (res[i].strip() == "1") matches[ranges[i]].checked = true;
+								if (res[i].trim() == "1") matches[ranges[i]].checked = true;
 								else matches[ranges[i]].checked = false;
 							}
 						}
