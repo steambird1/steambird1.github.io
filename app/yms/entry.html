@@ -9,7 +9,7 @@
 		
 		// 时间范围处理
 		const yconst = "yms_name";
-		const yqconst = "yms_query_2025_";		// Modified...
+		const yqconst = "yms_query_2025";		// Modified...
 		const forever = "Thu Nov 04 2077 05:14:00 GMT";
 
 		var ranges = [];
@@ -54,7 +54,7 @@
 		window.onload = function() {
 
 			try {
-				database = new Database("ymsdb", "081f0a30");
+				database = new Database("ymsdb2", "d9bb5083");
 
 			} catch (e) {
 				panic(e);
@@ -122,72 +122,60 @@
 			disp("waiter", true);
 			var strike = false;
 			let dkey = yqconst + myname + "_allow_desire";
-			setTimeout(function() {
-				let si = null;
+			//setTimeout(function() {
 				try {
+					let pg = document.getElementById("progid");
+					pg.value = 0;
+					//for (let i = 0; i < ranges.length; i++) {
 
-					
-					si = setInterval(function() {
-
-						if (pg.value == ranges.length) {
+					let key = yqconst + "_" + myname;
+					//console.log(database.get(key)[key]);//debugger.
+					database.getAsync(key, function(rec) {
+						if (strike) return;
+						pg.value++;
+						
+						if (rec[key] != "null") {
+							if (donot_allow_desire) {
+								
+								database.getAsync(dkey, function (desire_rec) {
+									//if (!force_desire) {
+										clearInterval(si);
+										//alert("该姓名已被填报，请使用填报时的设备登陆该填报系统！");
+										//document.getElementById("desire_error").innerHTML = "该姓名已被填报。<br />是否一定要修改？";
+									document.getElementById("studname").disabled = true;	
+									disp("desire_window", true);
+									disp("nextstepper", false);
+										strike = true;
+										disp("waiter", false);
+										disp("initial_name", true);
+									//} else {
+									//	document.getElementById("desire_notify").innerHTML = "您正在修改学生的信息！";
+									//	
+									//}
+								});
+								
+							}
+							//matches[ranges[i]].checked = true;
+							res = rec[key].split(",");
+							for (let i = 0; i < res.length; i++) {
+								if (res[i].strip() == "1") matches[ranges[i]].checked = true;
+								else matches[ranges[i]].checked = false;
+							}
+						}
+						//matches.push(thisobj);
+						if (!strike) {
 							disp("waiter", false);
 							disp("questions", true);
 							document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
 							document.getElementById("studdisp").innerHTML = myname;
 							database.updateAsync(dkey, "0");
-							clearInterval(si);
 						}
-					}, 500);
-					
-					let pg = document.getElementById("progid");
-					pg.value = 0;
-					for (let i = 0; i < ranges.length; i++) {
+					});
 
-						let key = yqconst + ranges[i] + "_" + myname;
-						//console.log(database.get(key)[key]);//debugger.
-						database.getAsync(key, function(rec) {
-							if (strike) return;
-							pg.value++;
-							
-							if (rec[key] == "1") {
-								if (donot_allow_desire) {
-									
-									database.getAsync(dkey, function (desire_rec) {
-										//if (!force_desire) {
-											clearInterval(si);
-											//alert("该姓名已被填报，请使用填报时的设备登陆该填报系统！");
-											//document.getElementById("desire_error").innerHTML = "该姓名已被填报。<br />是否一定要修改？";
-										document.getElementById("studname").disabled = true;	
-										disp("desire_window", true);
-										disp("nextstepper", false);
-											strike = true;
-											disp("waiter", false);
-											disp("initial_name", true);
-										//} else {
-										//	document.getElementById("desire_notify").innerHTML = "您正在修改学生的信息！";
-										//	
-										//}
-									});
-									
-								}
-								matches[ranges[i]].checked = true;
-							}
-							//matches.push(thisobj);
-							
-						});
-
-						if (strike) {
-							break;
-						}
-						
-					}
-					
-					
 				} catch (e) {
-					clearInterval(si);
 					panic(e);
 				}
-			}, 100);
+			//}, 100);
 		}
 
 		function name_nextstep() {
@@ -204,6 +192,7 @@
 			setTimeout(function() {
 				let si = null;
 				try {
+					/*
 					let pg = document.getElementById("progid");
 					pg.value = 0;
 	
@@ -221,6 +210,16 @@
 							clearInterval(si);
 						}
 					}, 500);
+					*/
+					let rlist = [];
+					for (let i = 0; i < ranges.length; i++) {
+						rlist.push(matches[ranges[i]].checked ? "1" : "0");
+					}
+					database.updateAsync(yqconst + "_" + myname, rlist.join(","), function() {
+						disp("waiter", false);
+						disp("questions", true);
+						alert("提交成功！");
+					});
 				} catch (e) {
 					clearInterval(si);
 					panic(e);
