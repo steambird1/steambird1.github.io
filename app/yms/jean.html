@@ -34,6 +34,7 @@
 		const yqconst = "yms_query_2025";
 		const gteamref = "yms_j_team_";		// team_ + teamid = team info (split by ',')
 		const glistref = "yms_j_part_";		// part_ + name
+		const forever = "Thu Nov 04 2077 05:14:00 GMT";
 		
 		const intlen = 6, maxsize = 3;
 		
@@ -279,6 +280,8 @@
 			document.getElementById("studname").disabled = true;
 			disp("waiter", true);
 			document.getElementById("revertor").onclick = function() { finalstep(teamstat); };
+			document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
+			document.cookie = ypconst + "=" + dvalue("phonenum") + "; expires=" + forever + ";";
 			setTimeout(function() {
 				try {
 					console.log("Starting: " + teamstat)
