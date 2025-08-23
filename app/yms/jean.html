@@ -1,0 +1,515 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1, maxinum-scale=1, width=device-width, user-scalable=yes, shrink-to-fit=no" />
+	<meta charset="utf-8" />
+	<title>云美术 - 团体报名</title>
+	<!-- Make artistic decoration on your own ! -->
+	<script src="https://steambird1.github.io/assets/tdjs.js">
+	
+	</script>
+	<style>
+		.emps {
+			font-weight: 700;
+		}
+		.warn {
+			color: red;
+		}
+		.waiter {
+			border: 2px dashed black;
+			background-color: yellow;
+		}
+		.fatal {
+			border: 2px dashed red;
+		}
+	</style>
+	<script>
+	
+		//<!--
+	
+		const rchr = "fnpr0mbkq4sxjewhv256g8ztulycoa791i3d";
+		
+		const yconst = "yms_name";			// MUST ENSURE INTEGRITY
+		const ypconst = "yms_phone";
+		const yqconst = "yms_query_2025";
+		const gteamref = "yms_j_team_";		// team_ + teamid = team info (split by ',')
+		const glistref = "yms_j_part_";		// part_ + name
+		
+		const intlen = 6, maxsize = 3;
+		
+		//var myphone = "";
+		var myname = "", myteam = null, current_inv = null;
+		
+		function notsearch() {
+			return window.location.protocol + "://" + window.location.host + window.location.pathname;
+		}
+		
+		// [lower, upper)
+		function randint(min, max) {
+			return Math.floor(Math.random() * (max-min) + min); 
+		}
+		
+		function panic(err) {
+			var ets = err.toString();
+			try {
+				ets += "<br />" + err.stack.replace("\n", "<br />");
+			} catch (e) {
+				console.log(e);
+			}
+			document.getElementById("errdisp").innerHTML = ets;
+			try {
+				if (window.navigator.userAgent.indexOf("Safari") < 0)
+					disp("safari_error", false);
+			} catch (e) {
+				// No catch
+				console.log(e);
+			}
+			disp("initial_name", false);
+			disp("questions", false);
+			disp("fatal", true);
+		}
+
+		function disp(div, state) {
+			document.getElementById(div).style = "display: " + (state ? "block" : "none");
+		}
+		
+		function dvalue(inputter) {
+			return document.getElementById(inputter).value;
+		}
+		
+		function copyfrom(inputter, reloader) {
+			if (reloader != null) {
+				document.getElementById("revertor").onclick = function() {
+					disp("fatal", false);
+					disp(reloader, true);
+				}
+			}
+			var dv = document.getElementById(inputter), dvd = false;
+			if (dv.disabled) {
+				dvd = true;
+				dv.disabled = false;
+			}
+			dv.select();
+			try {
+				document.execCommand("copy");
+				alert("复制成功！");
+			} catch (e) {
+				panic(e);
+			}
+			if (dvd) {
+				dv.disabled = true;
+			}
+		}
+		
+		var db = new Database("ymsdb", "081f0a30");
+		var database = db;
+		var dbcv = new Database("ymsdb2", "d9bb5083");
+		
+		function generate_str() {
+			const rdata = rchr.length;
+			var res = "";
+			for (let i = 0; i < intlen; i++) {
+				res += rchr[randint(0, rdata)];
+			}
+			return res;
+		}
+		
+		// sync call:
+		function generate_team() {
+			var ok = false, gen = "share";
+			do {
+				gen = generate_str();
+				var qs = db.get(gteamref + gen)[gteamref + gen];
+				if (qs == null || qs == "null") ok = true;
+			} while (!ok);
+			return gen;
+		}
+		
+		// sync call:
+		// receiver(true/false), true for old students
+		function check_is_old(name) {
+			var gid = yqconst + "_" + name;
+			var gres = dbcv.get(gid)[gid];
+			return (gres != null) && (gres != "null");
+		}
+		
+		// sync call:
+		// 在组团时即确认团中是否有老学员（如果已有则不允许加入）
+		function check_has_old(tres) {
+			if (tres == null || tres == "null") return false;
+			var tsp = tres.split(",");
+			for (let i = 0; i < tsp.length; i++) {
+				let ttr = tsp[i].trim();
+				if (ttr == "") continue;
+				if (check_is_old(ttr)) return ttr;
+			}
+			return null;
+		}
+		
+		// sync call:
+		function load_team(teamident) {
+			myteam = teamident;
+			document.getElementById("teamdisp").value = myteam;
+			document.getElementById("linkdisp").value = notsearch() + "?invition=" + myteam;
+			
+			var meminfo = db.get(gteamref + myteam)[gteamref + myteam];
+			var msp = meminfo.split(","), mflag = false;
+			for (let i = 0; i < msp.length; i++) {
+				if (msp[i] == myname) {
+					mflag = true; break;
+				}
+			}
+			if (!mflag) {
+				panic("Jean: invalid join into team " + myteam + "<br />Jean: not a member");
+				return;
+			}
+			console.log("Team data: " + meminfo);
+			document.getElementById("tmember").innerHTML = meminfo;
+			var cho = check_has_old(meminfo);
+			if (cho != null) {
+				document.getElementById("hasold").style = "color: blue;";
+				document.getElementById("hasold").innerHTML = "是 (" + cho + ")";
+			} else {
+				document.getElementById("hasold").style = "color: red;";
+				document.getElementById("hasold").innerHTML = "否";
+			}
+			
+			disp("waiter", false);
+			disp("newcomer", false);
+			disp("already_in", true);
+		}
+		
+		// async call (through timeout):
+		// 尝试加入给定团队
+		function invite_into(teamident) {
+		
+			if (myteam != null) {
+				alert("只能加入一个团队。如果要加入新团队，请先退出旧团队。");
+				finalstep(myteam);
+				return;
+			}
+		
+			disp("waiter", true);
+			disp("newcomer", false);
+			var my_reset = function() {
+				//disp("waiter", false);
+				//disp("newcomer", true);
+				finalstep(myteam);
+			};
+			document.getElementById("revertor").onclick = my_reset;
+			// TODO: 修改个人 glistref 和团队 gteamref
+			setTimeout(function() {
+				
+				try {
+					// 检查是否正常
+					var result = function() {
+					
+						var cold = check_is_old(myname);
+						var part = db.get(gteamref + teamident)[gteamref + teamident];
+						var psp = part.split(","), pscnt = 0;
+						for (let i = 0; i < psp.length; i++) {
+							if (psp[i].trim().length > 0) pscnt++;
+						}
+						if (pscnt >= maxsize) {
+							alert("团队人数已满，不能加入团队。");
+							return false;
+						}
+						
+						if (part == null || part == "null") part = "";
+						else part = part + ',';
+						if (cold && check_has_old(part)) {
+							alert("不能加入团队，因为该团队中已有老学员。每个团队中至多有 1 名老学员。");
+							return false;
+						}
+						
+						db.update(glistref + myname, teamident);
+						
+						db.update(gteamref + teamident, part + myname);
+						
+						return true;
+					}();
+					
+					disp("waiter", false);
+					if (!result) my_reset();
+					else {
+						load_team(teamident);
+					}
+					
+				} catch (e) {
+					panic(e);
+				}
+				
+			}, 200);
+		}
+		
+		function phoneok() {
+			const preg = /^1[3456789]\d{9}$/;
+			return preg.test(document.getElementById("phonenum").value);
+		}
+		
+		window.onload = function() {
+			try {
+				let dc = document.cookie.split(';');
+				for (let i = 0; i < dc.length; i++) {
+					let va = dc[i].split('=');
+					if (va[0] == yconst) {
+						myname = va[1].trim();
+					} else if (va[0] == ypconst) {
+						document.getElementById("phonenum").value = va[1].trim();
+					}
+				}
+			} catch (e) {
+				panic(e);
+			}
+		
+			var sch = window.location.search;
+			var such = new URLSearchParams(sch);
+			if (such.has("invition")) {
+				// TODO: 处理老学员被邀请逻辑？判断团内老学员数量
+				current_inv = such.get("invition");
+			}
+			
+			if (myname.length > 0 && phoneok()) name_nextstep_int(false);	// 等效于提交个人信息
+		}
+		
+		// teamstat 为 null 表示未加入团队
+		function finalstep(teamstat) {
+			disp("already_in", false);
+			disp("newcomer", false);
+			document.getElementById("studname").disabled = true;
+			disp("waiter", true);
+			document.getElementById("revertor").onclick = function() { finalstep(teamstat); };
+			setTimeout(function() {
+				try {
+					console.log("Starting: " + teamstat)
+					myteam = teamstat;
+					//document.getElementById("studdisp").innerHTML = myname;
+					if (current_inv != null && current_inv != "") {
+						// 不做确认
+						var xcurrent_inv = current_inv;
+						current_inv = null;
+						invite_into(xcurrent_inv);
+						return;
+					}
+					if (myteam == null) {
+						document.getElementById("teamdisp").innerHTML = "?";
+						disp("newcomer", true);
+						disp("waiter", false);
+					} else {
+						document.getElementById("teamdisp").innerHTML = myteam;
+						load_team(teamstat);
+					}
+				} catch (e) {
+					panic(e);
+				}
+			}, 200);
+		}
+		
+		function name_nextstep_int(donot_allow_desire) {
+			if (!phoneok()) {
+				alert("请填写正确的手机号！");
+				return;
+			} else {
+				db.updateAsync(ypconst + "_" + myname, dvalue("phonenum"), function() {
+					console.log("Phone number submission completed successfully");
+				});
+			}
+			disp("fatal", false);
+			document.getElementById("studname").disabled = false;
+			disp("desire_window", false);
+			//disp("nextstepper", true);
+			document.getElementById("revertor").onclick = function () {name_nextstep_int(donot_allow_desire); };
+			disp("initial_name", false);
+			disp("waiter", true);
+			var strike = false;
+			let dkey = yqconst + myname + "_allow_desire";
+			//setTimeout(function() {
+				try {
+					//for (let i = 0; i < ranges.length; i++) {
+
+					let key = glistref + myname;
+					//console.log(database.get(key)[key]);//debugger.
+					database.getAsync(key, function(rec) {
+						if (strike) return;
+						if (rec[key] != "null") {
+							if (donot_allow_desire) {
+								
+								database.getAsync(dkey, function (desire_rec) {
+									let force_desire = (desire_rec[dkey] == "1");
+									if (!force_desire) {
+									//	clearInterval(si);
+										//alert("该姓名已被填报，请使用填报时的设备登陆该填报系统！");
+										//document.getElementById("desire_error").innerHTML = "该姓名已被填报。<br />是否一定要修改？";
+										document.getElementById("studname").disabled = true;	
+										disp("desire_window", true);
+										disp("nextstepper", false);
+										strike = true;
+										disp("waiter", false);
+										disp("initial_name", true);
+									//} else {
+									//	document.getElementById("desire_notify").innerHTML = "您正在修改学生的信息！";
+									//	
+									//}
+									} else {
+										finalstep(rec[key]);
+										
+									}
+								});
+								
+							} else {
+								finalstep(rec[key]);
+							}
+							//matches[ranges[i]].checked = true;
+							
+						} else {
+							finalstep(null);
+						}
+						//matches.push(thisobj);
+						
+					});
+
+				} catch (e) {
+					panic(e);
+				}
+			//}, 100);
+		}
+		
+		function name_nextstep() {
+			if (confirm("请仔细检查姓名是否正确，避免错误填为他人信息！是否继续？")) {
+				myname = dvalue("studname");
+				name_nextstep_int(true);
+			}
+		}
+		
+		function quit_team() {
+			if (confirm("确实要退出团队吗？")) {
+				db.updateAsync(glistref + myname, "null", function() {
+					db.getAsync(gteamref + myteam, function (rec) {
+						let newlist = [], oldlist = rec[gteamref + myteam];
+						if (oldlist != null && oldlist != "null") {
+							oldlist = oldlist.split(',');
+							for (let i = 0; i < oldlist.length; i++) {
+								if (oldlist[i].trim() == '') continue;
+								if (oldlist[i].trim() != myname) newlist.push(oldlist[i]);
+							}
+							db.updateAsync(gteamref + myteam, newlist.join(','), function() {
+								finalstep(null);
+							});
+						} else {
+							document.getElementById("revertor").onclick = function () {
+								finalstep(null);
+							}
+							panic("<strong>已退出团队，但团队数据可能更新不正确。</strong>");
+						}
+					});
+					
+				});
+				
+				//finalstep(null);
+			}
+		}
+		
+		function create_team() {
+			disp("waiter", true);
+			setTimeout(function() {
+				var rt = generate_team();
+				invite_into(rt);
+			}, 200);
+		}
+		
+		function join_existing() {
+			// 防止乱填
+			var gn = dvalue("teamcode");
+			db.getAsync(gteamref + gn, function (rec) {
+				var res = rec[gteamref + gn];
+				if (res == null || res == "null") {
+					alert("团队码无效，请检查团队码");
+				} else {
+					invite_into(gn);
+				}
+			});
+		}
+		
+		//-->
+		
+	</script>
+</head>
+<body>
+	<h3>云美术报名系统 - 团体报名</h3>
+	<hr />
+	<span>学生姓名：</span>
+	<input type="text" id="studname" />
+	<span>手机号码：</span>
+	<input type="text" id="phonenum" />
+	<hr />
+	<div id="fatal" class="fatal" style="display: none;">
+		<strong class="warn">页面出现严重错误。</strong>
+		<hr />
+		<p>您可能需要检查网络连接。如果网络连接正常，那么：</p>
+		<p>这可能是由于选择了不兼容的浏览器导致的。</p>
+		<p class="warn" id="safari_error">该填报系统可能不支持 Safari 浏览器。<br />如果您使用的是 Safari，那么您可能需要更换浏览器。</p>
+		<p>否则，您可以<a href="#">刷新</a>再试。</p>
+		<!-- onclick 会自动变化的，不要慌张，特别是看到了源码的几位。自己回去看 inline script! -->
+		<p>点击<a href="javascript:void(0);" id="revertor" onclick="alert('对不起，该步骤无法恢复。请刷新页面。');">此处</a>可重试上一步。</p>
+		<p>问题信息：</p>
+		<p id="errdisp"></p>
+	</div>
+	<div id="waiter" class="waiter" style="display: none;">
+		<p>请稍等... 正在与数据库连接。<br />
+		<p>如果始终未出现下一步页面，请检查网络连接或<a href="#">刷新</a>页面。</p>
+	</div>
+	<!-- If we had money, we can add a verifier of this -->
+	<div id="initial_name">
+		<p>要参与团体报名，需要输入学生姓名。</p>
+		<br />
+		<p class="warn">请注意：姓名在确认后无法修改！</p>
+		<hr />
+		<!--<p class="warn" id="desire_error"></p>-->
+		<div id="desire_window" style="display: none;">
+			<p class="warn">系统检测到该学生已经在其它设备上填报过，<br />但无法自动验证您是否正确地输入了学生姓名。</p>
+			<p>请再次确认该姓名是否正确。<br />若正确，请点击“继续”。<br />若不正确，点击“取消”并修改后再重新进入。</p>
+			<button onclick="name_nextstep_int(false);" class="button_inline">继续</button>
+			<button onclick="name_undo();" class="button_inline">取消</button>
+		</div>
+		<button onclick="name_nextstep();" id="nextstepper">下一步</button>
+	</div>
+	<div id="questions">
+		<!-- 要求填写联系方式 -->
+		<!--
+		<span>学生姓名：</span>
+		<span class="emps" id="studdisp">?</span>
+		-->
+		<br />
+		<div id="already_in" style="display: none;">
+			<span>当前团队码：</span>
+			<input type="text" id="teamdisp" value="?" disabled="disabled" />
+			<a href="javascript:void(0);" onclick="copyfrom('teamdisp', 'questions')">复制</a>
+			<br />
+			<span>分享链接：</span>
+			<input type="text" id="linkdisp" value="?" width="70%" disabled="disabled" />
+			<a href="javascript:void(0);" onclick="copyfrom('linkdisp', 'questions')">复制</a>
+			<br />
+			<span>当前团队成员：</span>
+			<span class="emps" id="tmember">?</span>
+			<br />
+			<span>当前团队中是否有老学员：</span>
+			<span class="emps" id="hasold">?</span>
+			<hr />
+			<a href="javascript:void(0);" style="color: red;" onclick="quit_team()">退出团队</a>
+		</div>
+		
+		<div id="newcomer" style="display: none;">
+			<p>欢迎使用团体报名！您可以选择：</p>
+			<button onclick="create_team()">创建新团</button>
+			<br />
+			<span>或输入团队码：</span>
+			<input type="text" id="teamcode" />
+			<button onclick="join_existing()">加入团队</button>
+		</div>
+	</div>
+	<!-- 填报说明信息 -->
+	<div style="background-color: cyan; border: 1px solid black; margin-top: 50px;">
+		
+	</div>
+</body>
+</html>
