@@ -282,6 +282,7 @@
 			document.getElementById("revertor").onclick = function() { finalstep(teamstat); };
 			document.cookie = yconst + "=" + myname + "; expires=" + forever + ";";
 			document.cookie = ypconst + "=" + dvalue("phonenum") + "; expires=" + forever + ";";
+			document.getElementById("studname").value = myname;
 			setTimeout(function() {
 				try {
 					console.log("Starting: " + teamstat)
@@ -309,6 +310,10 @@
 		}
 		
 		function name_nextstep_int(donot_allow_desire) {
+			if (dvalue("studname").trim().length <= 1) {
+				alert("请填写正确的姓名！");
+				return;
+			}
 			if (!phoneok()) {
 				alert("请填写正确的手机号！");
 				return;
