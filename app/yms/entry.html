@@ -92,7 +92,7 @@
 				let dc = document.cookie.split(';');
 				for (let i = 0; i < dc.length; i++) {
 					let va = dc[i].split('=');
-					if (va[0] == yconst) {
+					if (va[0].trim() == yconst) {
 						myname = va[1].trim();
 						if (myname.length > 0) name_nextstep_int();
 						break;
