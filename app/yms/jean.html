@@ -205,6 +205,11 @@
 					// 检查是否正常
 					var result = function() {
 					
+						if (check_is_old(myname)) {
+							alert("老学员只能创建团队，不能参加团队。");
+							return false;
+						}
+					
 						var cold = check_is_old(myname);
 						var part = db.get(gteamref + teamident)[gteamref + teamident];
 						var psp = part.split(","), pscnt = 0;
@@ -526,7 +531,7 @@
 			<p style="color: red; font-weight: 700;">请注意：</p>
 			<ol>
 				<li>请填写报名学员姓名后创建团队或加入团队。</li>
-				<li>老学员原则上不能参加团队，只能创建团队。新学员可选择创建团队或参加团队。</li>
+				<li>老学员不能参加团队，只能创建团队。新学员可选择创建团队或参加团队。</li>
 			</ol>
 		</div>
 	</div>
