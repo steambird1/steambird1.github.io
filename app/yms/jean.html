@@ -285,6 +285,11 @@
 			document.getElementById("studname").value = myname;
 			setTimeout(function() {
 				try {
+					if (check_is_old(myname)) {
+						document.getElementById("special_join").disabled = true;
+					} else {
+						document.getElementById("special_join").disabled = false;
+					}
 					console.log("Starting: " + teamstat)
 					myteam = teamstat;
 					//document.getElementById("studdisp").innerHTML = myname;
@@ -310,7 +315,7 @@
 		}
 		
 		function name_nextstep_int(donot_allow_desire) {
-			if (dvalue("studname").trim().length <= 1) {
+			if ((myname == null || myname.length <= 1) && dvalue("studname").trim().length <= 1) {
 				alert("请填写正确的姓名！");
 				return;
 			}
@@ -443,7 +448,7 @@
 	</script>
 </head>
 <body>
-	<h3>云美术报名系统 - 团体报名</h3>
+	<h3>云美术组团报名活动</h3>
 	<hr />
 	<span>学生姓名：</span>
 	<input type="text" id="studname" />
@@ -512,12 +517,18 @@
 			<br />
 			<span>或输入团队码：</span>
 			<input type="text" id="teamcode" />
-			<button onclick="join_existing()">加入团队</button>
+			<button id="special_join" onclick="join_existing()">加入团队</button>
 		</div>
 	</div>
 	<!-- 填报说明信息 -->
-	<div style="background-color: cyan; border: 1px solid black; margin-top: 50px;">
-		
+	<div style="border: 1px solid black; margin-top: 50px;">
+		<div style="padding-top: 15px; padding-left: 15px;">
+			<p style="color: red; font-weight: 700;">请注意：</p>
+			<ol>
+				<li>请填写报名学员姓名后创建团队或加入团队。</li>
+				<li>老学员原则上不能参加团队，只能创建团队。新学员可选择创建团队或参加团队。</li>
+			</ol>
+		</div>
 	</div>
 </body>
 </html>
