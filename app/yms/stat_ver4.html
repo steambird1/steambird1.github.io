@@ -1,0 +1,135 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script>
+
+	const yconst = "yms_name";
+	const yqconst = "yms_query_2025_";
+	const forever = "Thu Nov 04 2077 05:14:00 GMT";
+
+	var ranges = [];
+	var database = null;
+
+	var namelists = {};
+	
+	function panic(err) {
+			alert(err);
+		}
+
+	function push_date(month, day) {
+			let d = new Date(2026,month-1,day);
+				if (d.getDay() != 6) {
+					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日上午");
+					ranges.push((d.getMonth() + 1) + "月" + d.getDate() + "日下午");
+				}
+		}
+
+		window.onload = function() {
+
+			for (let i = 7; i <= 13; i++) {
+				push_date(2,i);
+			}
+
+			try {
+				database = new Database("ymsdb2", "d9bb5083");
+				refresh();
+			} catch (e) {
+				panic(e);
+			}
+
+		}
+
+	function allower() {
+		let namesys = document.getElementById("special_allow").value;
+		let k = yqconst + namesys + "_allow_desire";
+		database.updateAsync(k, "1", function() {
+			alert("批准成功！");
+		});
+	}
+
+	function deleter() {
+		let namesys = document.getElementById("special_delete").value;
+		document.getElementById("delprog").max = ranges.length;
+		if (confirm("确认删除？注意：\n1. 此操作不可恢复。\n2. 此操作可能花费一段时间。")) {
+			/*for (let i = 0; i < ranges.length; i++) {
+				database.removeAsync(yqconst + ranges[i] + "_" + namesys, function () {
+					document.getElementById("delprog").value++;
+				});
+			}*/
+			database.removeAsync(yqconst + "_" + namesys, function() {
+				alert("操作成功！");
+			});
+		}
+	}
+
+	var comp = 0, cw = 0;
+
+	function refresh() {
+		comp = 0;
+		//cw = setInterval(function() {
+		var rf = document.getElementById("refinfo");
+		//	rf.innerHTML = "正在下载数据 (" + Math.floor(comp * 100 / ranges.length) + "%) ...";
+		//}, 500);
+		rf.innerHTML = "正在下载数据";
+		try {
+			database.searchAsync(yqconst, function(fdata) {
+				for (let j = 0; j < ranges.length; j++) namelists[ranges[j]] = [];
+				for (let i in fdata) {
+					let acname = i.split("_")[3];
+					let progs = fdata[i].split(",");
+					for (let j = 0; j < progs.length; j++) {
+						if (progs[j].trim() == "1") namelists[ranges[j]].push(acname);
+					}
+				}
+			
+				var rf = document.getElementById("refinfo");
+				rf.innerHTML = "";
+				// Loader
+				let tfield = document.getElementById('tdatas');
+				tfield.innerHTML = "";
+				for (let i = 0; i < ranges.length; i++) {
+					let cf = document.createElement('tr');
+					let cdate = document.createElement('td'), cnames = document.createElement('td'), ctotal = document.createElement('td');
+					cdate.innerHTML = ranges[i];
+					cnames.innerHTML = namelists[ranges[i]].join(",");
+					ctotal.innerHTML = "总人数 " + namelists[ranges[i]].length;
+					cf.appendChild(cdate);
+					cf.appendChild(cnames);
+					cf.appendChild(ctotal);
+					tfield.appendChild(cf);
+				}
+			});
+		} catch (e) {
+			alert("出现错误：" + e.toString() + "，请刷新页面后重试");
+		}
+		
+		
+		
+	}
+
+	</script>
+	<script src="http://steambird1.github.io/assets/tdjs.js">
+	</script>
+	<title>云美术 - 报名时间填写</title>
+</head>
+<body>
+	<strong>云美术 - 报名时间填写（后台操作）</strong>
+	<hr />
+	<!-- 直接展示表格 -->
+	<strong>允许特殊填报（输入姓名）：</strong>
+	<input type="text" id="special_allow" />
+	<button onclick="allower();">允许</button>
+	<hr />
+	<strong style="color: red;">彻底删除（此操作不可恢复！请在操作完成后刷新页面！）：</strong>
+	<input type="text" id="special_delete" />
+	<button onclick="deleter();">删除</button>
+	<progress id="delprog" value="0" max="100"></progress>
+	<hr />
+	<p style="color: red;">刷新操作可能需要较长的时间才能完成！</p>
+	<button onclick="refresh();">刷新</button>
+	<p style="color: blue;" id="refinfo"></p>
+	<table id="tdatas" border="1">
+	</table>
+</body>
+</html>
